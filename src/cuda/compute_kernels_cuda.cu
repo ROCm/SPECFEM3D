@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  !=====================================================================
  !
@@ -351,7 +352,7 @@ void FC_FUNC_(compute_kernels_elastic_cuda,
   // simulations with UNDO_ATTENUATION save as much memory as possible;
   // backward/reconstructed wavefield strain will be re-computed locally here
   if (*undo_attenuation){
-    compute_element_strain_cudakernel<<<grid,threads>>>(mp->d_ispec_is_elastic,mp->d_ibool,
+    hipLaunchKernelGGL(compute_element_strain_cudakernel, dim3(grid), dim3(threads), 0, 0, mp->d_ispec_is_elastic,mp->d_ibool,
                                                         mp->d_b_displ,
                                                         mp->d_b_epsilondev_xx,
                                                         mp->d_b_epsilondev_yy,
@@ -371,7 +372,7 @@ void FC_FUNC_(compute_kernels_elastic_cuda,
   // elastic kernels
   if (mp->anisotropic_kl ){
     // anisotropic kernel
-    compute_kernels_ani_cudakernel<<<grid,threads>>>(mp->d_ispec_is_elastic,mp->d_ibool,
+    hipLaunchKernelGGL(compute_kernels_ani_cudakernel, dim3(grid), dim3(threads), 0, 0, mp->d_ispec_is_elastic,mp->d_ibool,
                                                      mp->d_accel, mp->d_b_displ,
                                                      mp->d_epsilondev_xx,
                                                      mp->d_epsilondev_yy,
@@ -392,7 +393,7 @@ void FC_FUNC_(compute_kernels_elastic_cuda,
 
   }else{
     // isotropic kernel
-    compute_kernels_cudakernel<<<grid,threads>>>(mp->d_ispec_is_elastic,mp->d_ibool,
+    hipLaunchKernelGGL(compute_kernels_cudakernel, dim3(grid), dim3(threads), 0, 0, mp->d_ispec_is_elastic,mp->d_ibool,
                                                  mp->d_accel, mp->d_b_displ,
                                                  mp->d_epsilondev_xx,
                                                  mp->d_epsilondev_yy,
@@ -481,10 +482,10 @@ TRACE("compute_kernels_strgth_noise_cu");
   dim3 grid(num_blocks_x,num_blocks_y);
   dim3 threads(NGLL2,1,1);
 
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_noise_surface_movie,h_noise_surface_movie,
-                          NDIM*NGLL2*(mp->num_free_surface_faces)*sizeof(realw),cudaMemcpyHostToDevice),81000);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_noise_surface_movie,h_noise_surface_movie,
+                          NDIM*NGLL2*(mp->num_free_surface_faces)*sizeof(realw),hipMemcpyHostToDevice),81000);
 
-  compute_kernels_strength_noise_cuda_kernel<<<grid,threads>>>(mp->d_displ,
+  hipLaunchKernelGGL(compute_kernels_strength_noise_cuda_kernel, dim3(grid), dim3(threads), 0, 0, mp->d_displ,
                                                                mp->d_free_surface_ispec,
                                                                mp->d_free_surface_ijk,
                                                                mp->d_ibool,
@@ -697,7 +698,7 @@ TRACE("compute_kernels_acoustic_cuda");
   dim3 grid(num_blocks_x,num_blocks_y);
   dim3 threads(blocksize,1,1);
 
-  compute_kernels_acoustic_kernel<<<grid,threads>>>(mp->d_ispec_is_acoustic,
+  hipLaunchKernelGGL(compute_kernels_acoustic_kernel, dim3(grid), dim3(threads), 0, 0, mp->d_ispec_is_acoustic,
                                                     mp->d_ibool,
                                                     mp->d_rhostore,
                                                     mp->d_kappastore,
@@ -907,7 +908,7 @@ void FC_FUNC_(compute_kernels_hess_cuda,
   dim3 threads(blocksize,1,1);
 
   if (*ELASTIC_SIMULATION) {
-    compute_kernels_hess_el_cudakernel<<<grid,threads>>>(mp->d_ispec_is_elastic,
+    hipLaunchKernelGGL(compute_kernels_hess_el_cudakernel, dim3(grid), dim3(threads), 0, 0, mp->d_ispec_is_elastic,
                                                          mp->d_ibool,
                                                          mp->d_accel,
                                                          mp->d_b_accel,
@@ -927,7 +928,7 @@ void FC_FUNC_(compute_kernels_hess_cuda,
   }
 
   if (*ACOUSTIC_SIMULATION) {
-    compute_kernels_hess_ac_cudakernel<<<grid,threads>>>(mp->d_ispec_is_acoustic,
+    hipLaunchKernelGGL(compute_kernels_hess_ac_cudakernel, dim3(grid), dim3(threads), 0, 0, mp->d_ispec_is_acoustic,
                                                          mp->d_ibool,
                                                          mp->d_potential_dot_dot_acoustic,
                                                          mp->d_b_potential_dot_dot_acoustic,

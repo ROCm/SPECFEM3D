@@ -117,6 +117,17 @@ AM_CONDITIONAL([COND_CUDA_PLUS],
 )
 
 ###
+### HIP
+###
+
+AC_ARG_WITH([hip],
+    [AS_HELP_STRING([--with-hip],
+        [build AMD GPU enabled version @<:@default=no@:>@])],
+    [want_hip="$withval"],
+    [want_hip=no])
+AM_CONDITIONAL([COND_HIP], [test x"$want_hip" != xno])
+
+###
 ### OPENMP
 ###
 
@@ -425,6 +436,12 @@ AS_IF([test x"$want_cuda" != xno], [
     AS_BOX([CUDA])
     CIT_CUDA_CONFIG
 ])
+
+AS_IF([test x"$want_hip" != xno], [
+    AS_BOX([HIP])
+    CIT_HIP_CONFIG
+])
+
 
 ###
 ### OPENMP

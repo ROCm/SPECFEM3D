@@ -29,7 +29,7 @@
 S := ${S_TOP}/src/tomography/postprocess_sensitivity_kernels
 $(tomography/postprocess_sensitivity_kernels_OBJECTS): S := ${S_TOP}/src/tomography/postprocess_sensitivity_kernels
 
-#######################################
+
 
 tomography/postprocess_sensitivity_kernels_TARGETS = \
 	$E/xclip_sem \
@@ -183,24 +183,37 @@ endif
 ## libs
 xsmooth_sem_LIBS = $(MPILIBS) $(CUDA_LINK)
 INFO_CUDA_SEM="building xsmooth_sem with CUDA support"
+else ifeq ($(HIP),yes)
+INFO_CUDA_SEM="building xsmooth_sem with HIP support"
+xsmooth_sem_OBJECTS += $(cuda_smooth_sem_OBJECTS)
+xsmooth_sem_LIBS = $(MPILIBS) $(HIP_LINK)
 else
 ## non-cuda version
 xsmooth_sem_OBJECTS += $(cuda_smooth_sem_STUBS)
 ## libs
 xsmooth_sem_LIBS = $(MPILIBS)
-INFO_CUDA_SEM="building xsmooth_sem without CUDA support"
+INFO_CUDA_SEM="building xsmooth_sem without CUDA/HIP support"
 endif
 
 # extra dependencies
 $O/smooth_sem.postprocess.o: $O/specfem3D_par.spec_module.o $O/postprocess_par.postprocess_module.o
 
+ifeq ($(HIP),yes)
+${E}/xsmooth_sem: $(xsmooth_sem_OBJECTS) $(xsmooth_sem_SHARED_OBJECTS) $(COND_MPI_OBJECTS)
+	@echo ""
+	@echo $(INFO_HIP_SEM)
+	@echo ""
+	${HIP_LINKING} -o $@ $+ $(xsmooth_sem_LIBS) $(SET_HIP_LIB) $(SET_MPI_LIB)
+	@echo ""
+
+else
 ${E}/xsmooth_sem: $(xsmooth_sem_OBJECTS) $(xsmooth_sem_SHARED_OBJECTS) $(COND_MPI_OBJECTS)
 	@echo ""
 	@echo $(INFO_CUDA_SEM)
 	@echo ""
 	${FCLINK} -o $@ $+ $(xsmooth_sem_LIBS)
 	@echo ""
-
+endif
 #######################################
 
 ###
@@ -228,7 +241,7 @@ $O/%.postprocess.o: $S/%.c ${SETUP}/config.h
 ### CUDA
 ###
 $O/%.postprocess.cuda.o: $S/%.cu ${SETUP}/config.h $S/smooth_cuda.h
-	${NVCC} -c $< -o $@ $(NVCC_FLAGS)
+	${NVCC} -c $< -o $@ $(HIP_FLAGS)
 
 $(cuda_smooth_sem_DEVICE_OBJ): $(cuda_smooth_sem_OBJECTS)
-	${NVCCLINK} -o $(cuda_smooth_sem_DEVICE_OBJ) $(cuda_smooth_sem_OBJECTS)
+	${HIP_LINKING} -o $(cuda_smooth_sem_DEVICE_OBJ) $(cuda_smooth_sem_OBJECTS)

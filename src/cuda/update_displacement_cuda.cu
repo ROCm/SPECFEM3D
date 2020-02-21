@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  !=====================================================================
  !
@@ -109,7 +110,7 @@ void FC_FUNC_(update_displacement_cuda,
   }
 
   // Cuda timing
-  cudaEvent_t start,stop;
+  hipEvent_t start,stop;
   if (CUDA_TIMING_UPDATE ) start_timing_cuda(&start,&stop);
 
   // debug
@@ -120,7 +121,7 @@ void FC_FUNC_(update_displacement_cuda,
   //printf("rank %d - max displ: %f veloc: %f accel: %f\n",mp->myrank,max_d,max_v,max_a);
 
   //launch kernel
-  UpdateDispVeloc_kernel<<<grid,threads,0,mp->compute_stream>>>(displ,veloc,accel,
+  hipLaunchKernelGGL(UpdateDispVeloc_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, displ,veloc,accel,
                                                                 size,deltat,deltatsqover2,deltatover2);
 
   // Cuda timing
@@ -232,10 +233,10 @@ void FC_FUNC_(update_displacement_ac_cuda,
   }
 
   // Cuda timing
-  cudaEvent_t start,stop;
+  hipEvent_t start,stop;
   if (CUDA_TIMING_UPDATE ) start_timing_cuda(&start,&stop);
 
-  UpdatePotential_kernel<<<grid,threads,0,mp->compute_stream>>>(potential,
+  hipLaunchKernelGGL(UpdatePotential_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, potential,
                                                                 potential_dot,
                                                                 potential_dot_dot,
                                                                 size,deltat,deltatsqover2,deltatover2);
@@ -392,14 +393,14 @@ void FC_FUNC_(kernel_3_a_cuda,
   // check whether we can update accel and veloc, or only accel at this point
   if (*APPROXIMATE_OCEAN_LOAD == 0){
    // updates both, accel and veloc
-   kernel_3_cuda_device<<< grid, threads,0,mp->compute_stream>>>(veloc,
+   hipLaunchKernelGGL(kernel_3_cuda_device, dim3(grid), dim3(threads), 0, mp->compute_stream, veloc,
                                                                  accel,
                                                                  size,
                                                                  deltatover2,
                                                                  mp->d_rmassx,mp->d_rmassy,mp->d_rmassz);
   }else{
    // updates only accel
-   kernel_3_accel_cuda_device<<< grid, threads,0,mp->compute_stream>>>(accel,
+   hipLaunchKernelGGL(kernel_3_accel_cuda_device, dim3(grid), dim3(threads), 0, mp->compute_stream, accel,
                                                                        size,
                                                                        mp->d_rmassx,
                                                                        mp->d_rmassy,
@@ -434,13 +435,13 @@ void FC_FUNC_(kernel_3_b_cuda,
 
   realw deltatover2 = *deltatover2_F;
   // updates only veloc at this point
-  kernel_3_veloc_cuda_device<<< grid, threads,0,mp->compute_stream>>>(mp->d_veloc,
+  hipLaunchKernelGGL(kernel_3_veloc_cuda_device, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->d_veloc,
                                                                       mp->d_accel,
                                                                       size,deltatover2);
 
   if (mp->simulation_type == 3) {
     realw b_deltatover2 = *b_deltatover2_F;
-    kernel_3_veloc_cuda_device<<< grid, threads,0,mp->compute_stream>>>(mp->d_b_veloc,
+    hipLaunchKernelGGL(kernel_3_veloc_cuda_device, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->d_b_veloc,
                                                                         mp->d_b_accel,
                                                                         size,b_deltatover2);
   }
@@ -559,7 +560,7 @@ void FC_FUNC_(kernel_3_acoustic_cuda,
   // update kernel
   if (FORWARD_OR_ADJOINT == 0){
     // This kernel treats both forward and adjoint wavefield within the same call, to increase performance
-    kernel_3_acoustic_cuda_device<<< grid, threads>>>(mp->d_potential_dot_acoustic,
+    hipLaunchKernelGGL(kernel_3_acoustic_cuda_device, dim3(grid), dim3(threads), 0, 0, mp->d_potential_dot_acoustic,
                                                       mp->d_potential_dot_dot_acoustic,
                                                       mp->d_b_potential_dot_acoustic,
                                                       mp->d_b_potential_dot_dot_acoustic,
@@ -570,7 +571,7 @@ void FC_FUNC_(kernel_3_acoustic_cuda,
                                                       mp->d_rmass_acoustic);
   }else{
     // single field kernel
-    kernel_3_acoustic_single_cuda_device<<< grid, threads>>>(potential_dot,
+    hipLaunchKernelGGL(kernel_3_acoustic_single_cuda_device, dim3(grid), dim3(threads), 0, 0, potential_dot,
                                                              potential_dot_dot,
                                                              size,
                                                              deltaover2,

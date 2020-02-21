@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  !=====================================================================
  !
@@ -3666,7 +3667,7 @@ void Kernel_2(int nb_blocks_to_compute,Mesh* mp,int d_iphase,realw d_deltat,
   dim3 threads(blocksize,1,1);
 
   // Cuda timing
-  cudaEvent_t start,stop;
+  hipEvent_t start,stop;
   if (CUDA_TIMING ){
     start_timing_cuda(&start,&stop);
   }
@@ -3725,7 +3726,7 @@ void Kernel_2(int nb_blocks_to_compute,Mesh* mp,int d_iphase,realw d_deltat,
     TRACE("\tKernel_2: Kernel_2_att_impl");
     // compute kernels with attenuation
     // forward wavefields -> FORWARD_OR_ADJOINT == 1
-    Kernel_2_att_impl<<<grid,threads,0,mp->compute_stream>>>( nb_blocks_to_compute,
+    hipLaunchKernelGGL(Kernel_2_att_impl, dim3(grid), dim3(threads), 0, mp->compute_stream,  nb_blocks_to_compute,
                                                               d_ibool,
                                                               mp->d_phase_ispec_inner_elastic,
                                                               mp->num_phase_ispec_elastic,
@@ -3769,7 +3770,7 @@ void Kernel_2(int nb_blocks_to_compute,Mesh* mp,int d_iphase,realw d_deltat,
 
     if (mp->simulation_type == 3 && FORWARD_OR_ADJOINT == 0) {
       // backward/reconstructed wavefields -> FORWARD_OR_ADJOINT == 3
-      Kernel_2_att_impl<<<grid,threads,0,mp->compute_stream>>>(nb_blocks_to_compute,
+      hipLaunchKernelGGL(Kernel_2_att_impl, dim3(grid), dim3(threads), 0, mp->compute_stream, nb_blocks_to_compute,
                                                                d_ibool,
                                                                mp->d_phase_ispec_inner_elastic,
                                                                mp->num_phase_ispec_elastic,
@@ -3817,7 +3818,7 @@ void Kernel_2(int nb_blocks_to_compute,Mesh* mp,int d_iphase,realw d_deltat,
       TRACE("\tKernel_2: Kernel_2_noatt_ani_impl");
       // full anisotropy
       // forward wavefields -> FORWARD_OR_ADJOINT == 1
-      Kernel_2_noatt_ani_impl<<<grid,threads,0,mp->compute_stream>>>( nb_blocks_to_compute,
+      hipLaunchKernelGGL(Kernel_2_noatt_ani_impl, dim3(grid), dim3(threads), 0, mp->compute_stream,  nb_blocks_to_compute,
                                                                       d_ibool,
                                                                       mp->d_phase_ispec_inner_elastic,mp->num_phase_ispec_elastic,
                                                                       d_iphase,
@@ -3855,7 +3856,7 @@ void Kernel_2(int nb_blocks_to_compute,Mesh* mp,int d_iphase,realw d_deltat,
       // backward/reconstructed wavefield
       if (mp->simulation_type == 3 && FORWARD_OR_ADJOINT == 0) {
         // backward/reconstructed wavefields -> FORWARD_OR_ADJOINT == 3
-        Kernel_2_noatt_ani_impl<<< grid,threads,0,mp->compute_stream>>>( nb_blocks_to_compute,
+        hipLaunchKernelGGL(Kernel_2_noatt_ani_impl, dim3(grid), dim3(threads), 0, mp->compute_stream,  nb_blocks_to_compute,
                                                                          d_ibool,
                                                                          mp->d_phase_ispec_inner_elastic,mp->num_phase_ispec_elastic,
                                                                          d_iphase,
@@ -3897,7 +3898,7 @@ void Kernel_2(int nb_blocks_to_compute,Mesh* mp,int d_iphase,realw d_deltat,
         TRACE("\tKernel_2: Kernel_2_noatt_iso_grav_impl");
         // with gravity
         // forward wavefields -> FORWARD_OR_ADJOINT == 1
-        Kernel_2_noatt_iso_grav_impl<<<grid,threads,0,mp->compute_stream>>>(nb_blocks_to_compute,
+        hipLaunchKernelGGL(Kernel_2_noatt_iso_grav_impl, dim3(grid), dim3(threads), 0, mp->compute_stream, nb_blocks_to_compute,
                                                                             d_ibool,
                                                                             mp->d_phase_ispec_inner_elastic,mp->num_phase_ispec_elastic,
                                                                             d_iphase,
@@ -3928,7 +3929,7 @@ void Kernel_2(int nb_blocks_to_compute,Mesh* mp,int d_iphase,realw d_deltat,
         // backward/reconstructed wavefield
         if (mp->simulation_type == 3 && FORWARD_OR_ADJOINT == 0) {
           // backward/reconstructed wavefields -> FORWARD_OR_ADJOINT == 3
-          Kernel_2_noatt_iso_grav_impl<<< grid,threads,0,mp->compute_stream>>>(nb_blocks_to_compute,
+          hipLaunchKernelGGL(Kernel_2_noatt_iso_grav_impl, dim3(grid), dim3(threads), 0, mp->compute_stream, nb_blocks_to_compute,
                                                                                d_ibool,
                                                                                mp->d_phase_ispec_inner_elastic,mp->num_phase_ispec_elastic,
                                                                                d_iphase,
@@ -3962,7 +3963,7 @@ void Kernel_2(int nb_blocks_to_compute,Mesh* mp,int d_iphase,realw d_deltat,
           TRACE("\tKernel_2: Kernel_2_noatt_iso_col_impl");
           // with mesh coloring
           // forward wavefields -> FORWARD_OR_ADJOINT == 1
-          Kernel_2_noatt_iso_col_impl<<<grid,threads,0,mp->compute_stream>>>( nb_blocks_to_compute,
+          hipLaunchKernelGGL(Kernel_2_noatt_iso_col_impl, dim3(grid), dim3(threads), 0, mp->compute_stream,  nb_blocks_to_compute,
                                                                               d_ibool,
                                                                               mp->d_phase_ispec_inner_elastic,mp->num_phase_ispec_elastic,
                                                                               d_iphase,
@@ -3986,7 +3987,7 @@ void Kernel_2(int nb_blocks_to_compute,Mesh* mp,int d_iphase,realw d_deltat,
           // backward/reconstructed wavefield
           if (mp->simulation_type == 3 && FORWARD_OR_ADJOINT == 0) {
             // backward/reconstructed wavefields -> FORWARD_OR_ADJOINT == 3
-            Kernel_2_noatt_iso_col_impl<<< grid,threads,0,mp->compute_stream>>>( nb_blocks_to_compute,
+            hipLaunchKernelGGL(Kernel_2_noatt_iso_col_impl, dim3(grid), dim3(threads), 0, mp->compute_stream,  nb_blocks_to_compute,
                                                                                  d_ibool,
                                                                                  mp->d_phase_ispec_inner_elastic,mp->num_phase_ispec_elastic,
                                                                                  d_iphase,
@@ -4013,7 +4014,7 @@ void Kernel_2(int nb_blocks_to_compute,Mesh* mp,int d_iphase,realw d_deltat,
             TRACE("\tKernel_2: Kernel_2_noatt_iso_strain_impl");
             // stores strains
             // forward wavefields -> FORWARD_OR_ADJOINT == 1
-            Kernel_2_noatt_iso_strain_impl<<<grid,threads,0,mp->compute_stream>>>(nb_blocks_to_compute,
+            hipLaunchKernelGGL(Kernel_2_noatt_iso_strain_impl, dim3(grid), dim3(threads), 0, mp->compute_stream, nb_blocks_to_compute,
                                                                                   d_ibool,
                                                                                   mp->d_phase_ispec_inner_elastic,
                                                                                   mp->num_phase_ispec_elastic,
@@ -4039,7 +4040,7 @@ void Kernel_2(int nb_blocks_to_compute,Mesh* mp,int d_iphase,realw d_deltat,
             // backward/reconstructed wavefield
             if (mp->simulation_type == 3 && FORWARD_OR_ADJOINT == 0) {
               // backward/reconstructed wavefields -> FORWARD_OR_ADJOINT == 3
-              Kernel_2_noatt_iso_strain_impl<<< grid,threads,0,mp->compute_stream>>>(nb_blocks_to_compute,
+              hipLaunchKernelGGL(Kernel_2_noatt_iso_strain_impl, dim3(grid), dim3(threads), 0, mp->compute_stream, nb_blocks_to_compute,
                                                                                      d_ibool,
                                                                                      mp->d_phase_ispec_inner_elastic,
                                                                                      mp->num_phase_ispec_elastic,
@@ -4066,7 +4067,7 @@ void Kernel_2(int nb_blocks_to_compute,Mesh* mp,int d_iphase,realw d_deltat,
             if (mp->Kelvin_Voigt_damping) {
               TRACE("\tKernel_2: Kernel_2_noatt_iso_kelvinvoigt_impl");
               // Kelvin_Voigt_damping == true means there is fault in this partition
-              Kernel_2_noatt_iso_kelvinvoigt_impl<<<grid,threads,0,mp->compute_stream>>>(nb_blocks_to_compute,
+              hipLaunchKernelGGL(Kernel_2_noatt_iso_kelvinvoigt_impl, dim3(grid), dim3(threads), 0, mp->compute_stream, nb_blocks_to_compute,
                                                                                          d_ibool,
                                                                                          mp->d_phase_ispec_inner_elastic,
                                                                                          mp->num_phase_ispec_elastic,
@@ -4089,7 +4090,7 @@ void Kernel_2(int nb_blocks_to_compute,Mesh* mp,int d_iphase,realw d_deltat,
               TRACE("\tKernel_2: Kernel_2_noatt_iso_impl");
               // without storing strains
               // forward wavefields -> FORWARD_OR_ADJOINT == 1
-              Kernel_2_noatt_iso_impl<<<grid,threads,0,mp->compute_stream>>>(nb_blocks_to_compute,
+              hipLaunchKernelGGL(Kernel_2_noatt_iso_impl, dim3(grid), dim3(threads), 0, mp->compute_stream, nb_blocks_to_compute,
                                                                              d_ibool,
                                                                              mp->d_phase_ispec_inner_elastic,mp->num_phase_ispec_elastic,
                                                                              d_iphase,
@@ -4109,7 +4110,7 @@ void Kernel_2(int nb_blocks_to_compute,Mesh* mp,int d_iphase,realw d_deltat,
               // backward/reconstructed wavefield
               if (mp->simulation_type == 3 && FORWARD_OR_ADJOINT == 0) {
                 // backward/reconstructed wavefields -> FORWARD_OR_ADJOINT == 3
-                Kernel_2_noatt_iso_impl<<< grid,threads,0,mp->compute_stream>>>(nb_blocks_to_compute,
+                hipLaunchKernelGGL(Kernel_2_noatt_iso_impl, dim3(grid), dim3(threads), 0, mp->compute_stream, nb_blocks_to_compute,
                                                                                 d_ibool,
                                                                                 mp->d_phase_ispec_inner_elastic,
                                                                                 mp->num_phase_ispec_elastic,

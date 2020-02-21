@@ -32,6 +32,9 @@ $(specfem3D_OBJECTS): S = ${S_TOP}/src/specfem3D
 #######################################
 # solver objects - no statically allocated arrays anymore
 
+##############################################
+
+
 ####
 #### targets
 ####
@@ -229,6 +232,8 @@ specfem3D_OBJECTS += $(cuda_specfem3D_OBJECTS)
 ifeq ($(CUDA_PLUS),yes)
 specfem3D_OBJECTS += $(cuda_specfem3D_DEVICE_OBJ)
 endif
+else ifeq ($(HIP),yes)
+specfem3D_OBJECTS += $(cuda_specfem3D_OBJECTS)
 else
 specfem3D_OBJECTS += $(cuda_specfem3D_STUBS)
 endif
@@ -329,6 +334,17 @@ ${E}/xspecfem3D: $(specfem3D_OBJECTS) $(specfem3D_SHARED_OBJECTS)
 	@echo $(INFO_CUDA_SPECFEM)
 	@echo ""
 	${FCLINK} -o ${E}/xspecfem3D $(specfem3D_OBJECTS) $(specfem3D_SHARED_OBJECTS) $(MPILIBS) $(CUDA_LINK) $(VTKLIBS) $(SPECFEM_LINK_FLAGS)
+	@echo ""
+
+else ifeq ($(HIP),yes)
+
+INFO_CUDA_SPECFEM="building xspecfem3D with HIP support"
+
+${E}/xspecfem3D: $(specfem3D_OBJECTS) $(specfem3D_SHARED_OBJECTS)
+	@echo ""
+	@echo $(INFO_CUDA_SPECFEM)
+	@echo ""
+	$(HIP_LINKING) -o ${E}/xspecfem3D $(specfem3D_OBJECTS) $(specfem3D_SHARED_OBJECTS) $(SET_MPI_LIB) $(SET_HIP_LIB) $(VTKLIBS) $(SPECFEM_LINK_FLAGS)
 	@echo ""
 
 else

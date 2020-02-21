@@ -36,6 +36,8 @@ $(inverse_problem_for_model_OBJECTS): S = ${S_TOP}/src/inverse_problem_for_model
 #######################################
 # solver objects - no statically allocated arrays anymore
 
+##############################################
+
 ####
 #### targets
 ####
@@ -310,9 +312,8 @@ cuda_inverse_problem_for_model_DEVICE_OBJ = \
 
 ifeq ($(CUDA),yes)
 inverse_problem_for_model_OBJECTS += $(cuda_inverse_problem_for_model_OBJECTS)
-ifeq ($(CUDA_PLUS),yes)
-inverse_problem_for_model_OBJECTS += $(cuda_inverse_problem_for_model_DEVICE_OBJ)
-endif
+else ifeq ($(HIP),yes)
+inverse_problem_for_model_OBJECTS += $(cuda_inverse_problem_for_model_OBJECTS)
 else
 inverse_problem_for_model_OBJECTS += $(cuda_inverse_problem_for_model_STUBS)
 endif
@@ -388,6 +389,16 @@ ${E}/xinverse_problem_for_model: $(inverse_problem_for_model_OBJECTS) $(inverse_
 	@echo $(INFO_CUDA_INVERSE_PROBLEM)
 	@echo ""
 	${FCLINK} -o ${E}/xinverse_problem_for_model $(inverse_problem_for_model_OBJECTS) $(inverse_problem_for_model_SHARED_OBJECTS) $(MPILIBS) $(CUDA_LINK)
+	@echo ""
+
+else ifeq ($(HIP),yes)
+
+INFO_HIP_INVERSE_PROBLEM="building xinverse_problem_for_model with HIP support"
+${E}/xinverse_problem_for_model: $(inverse_problem_for_model_OBJECTS) $(inverse_problem_for_model_SHARED_OBJECTS)
+	@echo ""
+	@echo $(INFO_HIP_INVERSE_PROBLEM)
+	@echo ""
+	$(HIP_LINKING) -o  ${E}/xinverse_problem_for_model $(inverse_problem_for_model_OBJECTS) $(inverse_problem_for_model_SHARED_OBJECTS) $(MPILIBS) $(SET_MPI_LIB) $(SET_HIP_LIB) -lstdc++  $(VTKLIBS)
 	@echo ""
 
 else

@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  !=====================================================================
  !
@@ -64,11 +65,11 @@ void FC_FUNC_(initialize_fault_data,
 
   int recordlength = 7; //store 7 different quantities
 
-  print_CUDA_error_if_any(cudaMalloc((void**)&(fault_data_recorder->iglob), fault_data_recorder->NRECORD*sizeof(int)),60001);
+  print_CUDA_error_if_any(hipMalloc((void**)&(fault_data_recorder->iglob), fault_data_recorder->NRECORD*sizeof(int)),60001);
 
-  print_CUDA_error_if_any(cudaMemcpy(fault_data_recorder->iglob, iglob, fault_data_recorder->NRECORD*sizeof(int), cudaMemcpyHostToDevice),60002);
+  print_CUDA_error_if_any(hipMemcpy(fault_data_recorder->iglob, iglob, fault_data_recorder->NRECORD*sizeof(int), hipMemcpyHostToDevice),60002);
 
-  print_CUDA_error_if_any(cudaMalloc((void**)&(fault_data_recorder->dataT), recordlength*fault_data_recorder->NRECORD*fault_data_recorder->NT*sizeof(realw)),60003);
+  print_CUDA_error_if_any(hipMalloc((void**)&(fault_data_recorder->dataT), recordlength*fault_data_recorder->NRECORD*fault_data_recorder->NT*sizeof(realw)),60003);
 
   Fault_solver_dynamics* Fsolver = (Fault_solver_dynamics*)(*Fault_solver);
 
@@ -82,9 +83,9 @@ void FC_FUNC_(initialize_fault_data,
 void copy_todevice_realw_test(void** d_array_addr_ptr,realw* h_array,int size) {
 
   // allocates memory on GPU
-  cudaMalloc((void**)d_array_addr_ptr,size*sizeof(realw));
+  hipMalloc((void**)d_array_addr_ptr,size*sizeof(realw));
   // copies values onto GPU
-  cudaMemcpy((realw*) *d_array_addr_ptr,h_array,size*sizeof(realw),cudaMemcpyHostToDevice);
+  hipMemcpy((realw*) *d_array_addr_ptr,h_array,size*sizeof(realw),hipMemcpyHostToDevice);
 }
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -92,7 +93,7 @@ void copy_todevice_realw_test(void** d_array_addr_ptr,realw* h_array,int size) {
 void copy_tohost_realw_test(void** d_array_addr_ptr,realw* h_array,int size) {
 
   // copies values onto GPU
-  cudaMemcpy(h_array, (realw*) *d_array_addr_ptr,size*sizeof(realw),cudaMemcpyDeviceToHost);
+  hipMemcpy(h_array, (realw*) *d_array_addr_ptr,size*sizeof(realw),hipMemcpyDeviceToHost);
 }
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -101,9 +102,9 @@ void copy_tohost_realw_test(void** d_array_addr_ptr,realw* h_array,int size) {
 void copy_todevice_int_test(void** d_array_addr_ptr,int* h_array,int size) {
 
   // allocates memory on GPU
-  cudaMalloc((void**)d_array_addr_ptr,size*sizeof(int));
+  hipMalloc((void**)d_array_addr_ptr,size*sizeof(int));
   // copies values onto GPU
-  cudaMemcpy((realw*) *d_array_addr_ptr,h_array,size*sizeof(int),cudaMemcpyHostToDevice);
+  hipMemcpy((realw*) *d_array_addr_ptr,h_array,size*sizeof(int),hipMemcpyHostToDevice);
 }
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -111,7 +112,7 @@ void copy_todevice_int_test(void** d_array_addr_ptr,int* h_array,int size) {
 void copy_tohost_int_test(void** d_array_addr_ptr,int* h_array,int size) {
 
   // allocates memory on GPU
-  cudaMemcpy(h_array,(realw*) *d_array_addr_ptr,size*sizeof(int),cudaMemcpyDeviceToHost);
+  hipMemcpy(h_array,(realw*) *d_array_addr_ptr,size*sizeof(int),hipMemcpyDeviceToHost);
 }
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -119,7 +120,7 @@ void copy_tohost_int_test(void** d_array_addr_ptr,int* h_array,int size) {
 void allocate_cuda_memory_test(void** d_array_addr_ptr,int size) {
 
   // allocates memory on GPU
-  cudaMalloc((void**)d_array_addr_ptr,size*sizeof(int));
+  hipMalloc((void**)d_array_addr_ptr,size*sizeof(int));
 }
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -851,7 +852,7 @@ __global__  void compute_dynamic_fault_cuda(realw* Displ, /*mesh quantities*/
 
   Vf_newl = (realw)rtsafe(0.0E0, Vf_oldl+5.0E0, 1.0E-5, netTstick, -Tz, Zl, f0l, V0l, al, bl, Ll, thetal, 0.0, 1);
 
-  assert(Vf_newl > -1.0E-6);      /** Double precisio to single precision conversion may cause an error of about 1e-6*/
+//  assert(Vf_newl > -1.0E-6);      /** Double precisio to single precision conversion may cause an error of about 1e-6*/
 
   Vf_newl = MAX(Vf_newl,0.0E0);
 
@@ -939,7 +940,7 @@ void FC_FUNC_(fault_solver_gpu,
       num_of_block2 = (int) (Flt->output_dataT->NRECORD/128)+1;
       if (false){ // this is dirty implementation
 
-        compute_dynamic_fault_cuda<<<num_of_block,128>>>( mp->d_displ,
+        hipLaunchKernelGGL(compute_dynamic_fault_cuda, dim3(num_of_block), dim3(128), 0, 0,  mp->d_displ,
                                                           mp->d_veloc,
                                                           mp->d_accel,
                                                           Flt->NGLOB_AB,
@@ -967,7 +968,7 @@ void FC_FUNC_(fault_solver_gpu,
                                                           *dt,
                                                           *myrank);
       }else{
-        compute_dynamic_fault_cuda_swf<<<num_of_block,128>>>( mp->d_displ,
+        hipLaunchKernelGGL(compute_dynamic_fault_cuda_swf, dim3(num_of_block), dim3(128), 0, 0,  mp->d_displ,
                                                               mp->d_veloc,
                                                               mp->d_accel,
                                                               Flt->NGLOB_AB,
@@ -991,7 +992,7 @@ void FC_FUNC_(fault_solver_gpu,
                                                               *dt,
                                                               *myrank);
 
-        store_dataT<<<num_of_block2,128>>>( Flt->output_dataT->dataT,
+        hipLaunchKernelGGL(store_dataT, dim3(num_of_block2), dim3(128), 0, 0,  Flt->output_dataT->dataT,
                                             Flt->V,
                                             Flt->D,
                                             Flt->T,

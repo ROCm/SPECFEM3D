@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  !=====================================================================
  !
@@ -89,7 +90,7 @@ TRACE("transfer_boun_pot_from_device");
     dim3 threads(blocksize,1,1);
 
     if (*FORWARD_OR_ADJOINT == 1) {
-      prepare_boundary_potential_on_device<<<grid,threads,0,mp->compute_stream>>>(mp->d_potential_dot_dot_acoustic,
+      hipLaunchKernelGGL(prepare_boundary_potential_on_device, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->d_potential_dot_dot_acoustic,
                                                                                    mp->d_send_potential_dot_dot_buffer,
                                                                                    mp->num_interfaces_ext_mesh,
                                                                                    mp->max_nibool_interfaces_ext_mesh,
@@ -99,15 +100,15 @@ TRACE("transfer_boun_pot_from_device");
       // synchronizes
       //synchronize_cuda();
       // explicitly waits until previous compute stream finishes
-      // (cudaMemcpy implicitly synchronizes all other cuda operations)
-      cudaStreamSynchronize(mp->compute_stream);
+      // (hipMemcpy implicitly synchronizes all other cuda operations)
+      hipStreamSynchronize(mp->compute_stream);
 
-      print_CUDA_error_if_any(cudaMemcpy(send_potential_dot_dot_buffer,mp->d_send_potential_dot_dot_buffer,
-                                         mp->size_mpi_buffer_potential*sizeof(field),cudaMemcpyDeviceToHost),98000);
+      print_CUDA_error_if_any(hipMemcpy(send_potential_dot_dot_buffer,mp->d_send_potential_dot_dot_buffer,
+                                         mp->size_mpi_buffer_potential*sizeof(field),hipMemcpyDeviceToHost),98000);
     }
     else if (*FORWARD_OR_ADJOINT == 3) {
       // backward/reconstructed wavefield buffer
-      prepare_boundary_potential_on_device<<<grid,threads,0,mp->compute_stream>>>(mp->d_b_potential_dot_dot_acoustic,
+      hipLaunchKernelGGL(prepare_boundary_potential_on_device, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->d_b_potential_dot_dot_acoustic,
                                                                                    mp->d_b_send_potential_dot_dot_buffer,
                                                                                    mp->num_interfaces_ext_mesh,
                                                                                    mp->max_nibool_interfaces_ext_mesh,
@@ -117,11 +118,11 @@ TRACE("transfer_boun_pot_from_device");
       // synchronizes
       //synchronize_cuda();
       // explicitly waits until previous compute stream finishes
-      // (cudaMemcpy implicitly synchronizes all other cuda operations)
-      cudaStreamSynchronize(mp->compute_stream);
+      // (hipMemcpy implicitly synchronizes all other cuda operations)
+      hipStreamSynchronize(mp->compute_stream);
 
-      print_CUDA_error_if_any(cudaMemcpy(send_potential_dot_dot_buffer,mp->d_b_send_potential_dot_dot_buffer,
-                                         mp->size_mpi_buffer_potential*sizeof(field),cudaMemcpyDeviceToHost),98000);
+      print_CUDA_error_if_any(hipMemcpy(send_potential_dot_dot_buffer,mp->d_b_send_potential_dot_dot_buffer,
+                                         mp->size_mpi_buffer_potential*sizeof(field),hipMemcpyDeviceToHost),98000);
     }
   }
 
@@ -129,11 +130,11 @@ TRACE("transfer_boun_pot_from_device");
 
 
   // finish timing of kernel+memcpy
-  // cudaEventRecord( stop, 0);
-  // cudaEventSynchronize( stop );
-  // cudaEventElapsedTime( &time, start, stop );
-  // cudaEventDestroy( start );
-  // cudaEventDestroy( stop );
+  // hipEventRecord( stop, 0);
+  // hipEventSynchronize( stop );
+  // hipEventElapsedTime( &time, start, stop );
+  // hipEventDestroy( start );
+  // hipEventDestroy( stop );
   // printf("boundary xfer d->h Time: %f ms\n",time);
   GPU_ERROR_CHECKING("transfer_boun_pot_from_device");
 }
@@ -194,7 +195,7 @@ TRACE("transfer_asmbl_pot_to_device");
   Mesh* mp = (Mesh*)(*Mesh_pointer); //get mesh pointer out of fortran integer container
 
   // Cuda timing
-  //cudaEvent_t start, stop;
+  //hipEvent_t start, stop;
   //start_timing_cuda(&start,&stop);
 
   // checks if anything to do
@@ -215,11 +216,11 @@ TRACE("transfer_asmbl_pot_to_device");
 
     if (*FORWARD_OR_ADJOINT == 1) {
       // copies buffer onto GPU
-      print_CUDA_error_if_any(cudaMemcpy(mp->d_send_potential_dot_dot_buffer, buffer_recv_scalar_ext_mesh,
-                                         mp->size_mpi_buffer_potential*sizeof(field), cudaMemcpyHostToDevice),98010);
+      print_CUDA_error_if_any(hipMemcpy(mp->d_send_potential_dot_dot_buffer, buffer_recv_scalar_ext_mesh,
+                                         mp->size_mpi_buffer_potential*sizeof(field), hipMemcpyHostToDevice),98010);
 
       //assemble forward field
-      assemble_boundary_potential_on_device<<<grid,threads,0,mp->compute_stream>>>(mp->d_potential_dot_dot_acoustic,
+      hipLaunchKernelGGL(assemble_boundary_potential_on_device, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->d_potential_dot_dot_acoustic,
                                                                                     mp->d_send_potential_dot_dot_buffer,
                                                                                     mp->num_interfaces_ext_mesh,
                                                                                     mp->max_nibool_interfaces_ext_mesh,
@@ -228,11 +229,11 @@ TRACE("transfer_asmbl_pot_to_device");
     }
     else if (*FORWARD_OR_ADJOINT == 3) {
       // copies buffer onto GPU
-      print_CUDA_error_if_any(cudaMemcpy(mp->d_b_send_potential_dot_dot_buffer, buffer_recv_scalar_ext_mesh,
-                                         mp->size_mpi_buffer_potential*sizeof(field), cudaMemcpyHostToDevice),98011);
+      print_CUDA_error_if_any(hipMemcpy(mp->d_b_send_potential_dot_dot_buffer, buffer_recv_scalar_ext_mesh,
+                                         mp->size_mpi_buffer_potential*sizeof(field), hipMemcpyHostToDevice),98011);
 
       //assemble reconstructed/backward field
-      assemble_boundary_potential_on_device<<<grid,threads,0,mp->compute_stream>>>(mp->d_b_potential_dot_dot_acoustic,
+      hipLaunchKernelGGL(assemble_boundary_potential_on_device, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->d_b_potential_dot_dot_acoustic,
                                                                                     mp->d_b_send_potential_dot_dot_buffer,
                                                                                     mp->num_interfaces_ext_mesh,
                                                                                     mp->max_nibool_interfaces_ext_mesh,

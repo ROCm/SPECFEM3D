@@ -48,22 +48,22 @@ void FC_FUNC_(initialize_cuda_device,
 
   /*
    // cuda initialization (needs -lcuda library)
-   // note:   cuInit initializes the driver API.
+   // note:   hipInit initializes the driver API.
    //             it is needed for any following CUDA driver API function call (format cuFUNCTION(..) )
    //             however, for the CUDA runtime API functions (format cudaFUNCTION(..) )
-   //             the initialization is implicit, thus cuInit() here would not be needed...
-   CUresult status = cuInit(0);
-   if (CUDA_SUCCESS != status) exit_on_error("CUDA driver API device initialization failed\n");
+   //             the initialization is implicit, thus hipInit() here would not be needed...
+   hipError_t status = hipInit(0);
+   if (hipSuccess != status) exit_on_error("CUDA driver API device initialization failed\n");
 
    // returns a handle to the first cuda compute device
-   CUdevice dev;
-   status = cuDeviceGet(&dev, 0);
-   if (CUDA_SUCCESS != status) exit_on_error("CUDA device not found\n");
+   hipDevice_t dev;
+   status = hipGetDevice(&dev, 0);
+   if (hipSuccess != status) exit_on_error("CUDA device not found\n");
 
    // gets device properties
    int major,minor;
-   status = cuDeviceComputeCapability(&major,&minor,dev);
-   if (CUDA_SUCCESS != status) exit_on_error("CUDA device information not found\n");
+   status = hipDeviceComputeCapability(&major,&minor,dev);
+   if (hipSuccess != status) exit_on_error("CUDA device information not found\n");
 
    // make sure that the device has compute capability >= 1.3
    if (major < 1){
@@ -80,29 +80,29 @@ void FC_FUNC_(initialize_cuda_device,
 
   // Gets number of GPU devices
   device_count = 0;
-  cudaGetDeviceCount(&device_count);
+  hipGetDeviceCount(&device_count);
   // Do not check if command failed with `exit_on_cuda_error` since it calls cudaDevice()/ThreadSynchronize():
   // If multiple MPI tasks access multiple GPUs per node, they will try to synchronize
   // GPU 0 and depending on the order of the calls, an error will be raised
   // when setting the device number. If MPS is enabled, some GPUs will silently not be used.
   //
   // being verbose and catches error from first call to CUDA runtime function, without synchronize call
-  cudaError_t err = cudaGetLastError();
+  hipError_t err = hipGetLastError();
 
   // adds quick check on versions
   int driverVersion = 0, runtimeVersion = 0;
-  cudaDriverGetVersion(&driverVersion);
-  cudaRuntimeGetVersion(&runtimeVersion);
+  hipDriverGetVersion(&driverVersion);
+  hipRuntimeGetVersion(&runtimeVersion);
 
   // exit in case first cuda call failed
-  if (err != cudaSuccess){
-    fprintf(stderr,"Error after cudaGetDeviceCount: %s\n", cudaGetErrorString(err));
+  if (err != hipSuccess){
+    fprintf(stderr,"Error after hipGetDeviceCount: %s\n", hipGetErrorString(err));
     fprintf(stderr,"CUDA Device count: %d\n",device_count);
     fprintf(stderr,"CUDA Driver Version / Runtime Version: %d.%d / %d.%d\n",
             driverVersion / 1000, (driverVersion % 100) / 10,
             runtimeVersion / 1000, (runtimeVersion % 100) / 10);
 
-    exit_on_error("CUDA runtime error: cudaGetDeviceCount failed\n\nplease check if driver and runtime libraries work together\nor on cluster environments enable MPS (Multi-Process Service) to use single GPU with multiple MPI processes\n\nexiting...\n");
+    exit_on_error("CUDA runtime error: hipGetDeviceCount failed\n\nplease check if driver and runtime libraries work together\nor on cluster environments enable MPS (Multi-Process Service) to use single GPU with multiple MPI processes\n\nexiting...\n");
   }
 
   // returns device count to fortran
@@ -112,14 +112,14 @@ void FC_FUNC_(initialize_cuda_device,
   // Sets the active device
   if (device_count >= 1) {
     // generalized for more GPUs per node
-    // note: without previous context release, cudaSetDevice will complain with the cuda error
+    // note: without previous context release, hipSetDevice will complain with the cuda error
     //         "setting the device when a process is active is not allowed"
 
     // releases previous contexts
 #if CUDA_VERSION < 4000
-    cudaThreadExit();
+    hipDeviceReset();
 #else
-    cudaDeviceReset();
+    hipDeviceReset();
 #endif
 
     //printf("rank %d: cuda device count = %d sets device = %d \n",myrank,device_count,myrank % device_count);
@@ -131,14 +131,14 @@ void FC_FUNC_(initialize_cuda_device,
     device = CUDA_DEVICE_ID;
     if (myrank == 0) printf("setting cuda devices with id = %d for all processes by -DCUDA_DEVICE_ID\n\n",device);
 
-    cudaSetDevice( device );
-    exit_on_cuda_error("cudaSetDevice has invalid device");
+    hipSetDevice( device );
+    exit_on_cuda_error("hipSetDevice has invalid device");
 
     // double check that device was  properly selected
-    cudaGetDevice(&device);
+    hipGetDevice(&device);
     if (device != CUDA_DEVICE_ID ){
        printf("error rank: %d devices: %d \n",myrank,device_count);
-       printf("  cudaSetDevice()=%d\n  cudaGetDevice()=%d\n",CUDA_DEVICE_ID,device);
+       printf("  hipSetDevice()=%d\n  hipGetDevice()=%d\n",CUDA_DEVICE_ID,device);
        exit_on_error("CUDA set/get device error: device id conflict \n");
     }
 #else
@@ -146,25 +146,25 @@ void FC_FUNC_(initialize_cuda_device,
     // (assumes that number of devices per node is the same for different compute nodes)
     device = myrank % device_count;
 
-    cudaSetDevice( device );
-    exit_on_cuda_error("cudaSetDevice has invalid device");
+    hipSetDevice( device );
+    exit_on_cuda_error("hipSetDevice has invalid device");
 
     // double check that device was  properly selected
-    cudaGetDevice(&device);
+    hipGetDevice(&device);
     if (device != (myrank % device_count) ){
        printf("error rank: %d devices: %d \n",myrank,device_count);
-       printf("  cudaSetDevice()=%d\n  cudaGetDevice()=%d\n",myrank%device_count,device);
+       printf("  hipSetDevice()=%d\n  hipGetDevice()=%d\n",myrank%device_count,device);
        exit_on_error("CUDA set/get device error: device id conflict \n");
     }
 #endif
   }
 
   // returns a handle to the active device
-  cudaGetDevice(&device);
+  hipGetDevice(&device);
 
   // get device properties
-  struct cudaDeviceProp deviceProp;
-  cudaGetDeviceProperties(&deviceProp,device);
+  struct hipDeviceProp_t deviceProp;
+  hipGetDeviceProperties(&deviceProp,device);
 
   // exit if the machine has no CUDA-enabled device
   if (deviceProp.major == 9999 && deviceProp.minor == 9999){
@@ -220,11 +220,11 @@ void FC_FUNC_(initialize_cuda_device,
       }else{
         fprintf(fp,"  canMapHostMemory: FALSE\n");
       }
-      if (deviceProp.deviceOverlap){
+    /*if (deviceProp.deviceOverlap){
         fprintf(fp,"  deviceOverlap: TRUE\n");
       }else{
         fprintf(fp,"  deviceOverlap: FALSE\n");
-      }
+      } */
       if (deviceProp.concurrentKernels){
         fprintf(fp,"  concurrentKernels: TRUE\n");
       }else{
@@ -235,7 +235,7 @@ void FC_FUNC_(initialize_cuda_device,
               driverVersion / 1000, (driverVersion % 100) / 10,
               runtimeVersion / 1000, (runtimeVersion % 100) / 10);
 
-      // outputs initial memory infos via cudaMemGetInfo()
+      // outputs initial memory infos via hipMemGetInfo()
       fprintf(fp,"memory usage:\n");
       fprintf(fp,"  rank %d: GPU memory usage: used = %f MB, free = %f MB, total = %f MB\n",myrank,
               used_db/1024.0/1024.0, free_db/1024.0/1024.0, total_db/1024.0/1024.0);

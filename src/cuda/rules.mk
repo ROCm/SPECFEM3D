@@ -74,11 +74,11 @@ cuda_DEVICE_OBJ = \
 ####
 
 ###
-### CUDA compilation
+### HIP compilation
 ###
 
 $O/%.cuda.o: $S/%.cu ${SETUP}/config.h $S/mesh_constants_cuda.h $S/prepare_constants_cuda.h
-	${NVCC} -c $< -o $@ $(NVCC_FLAGS)
+	${NVCC} -c $< -o $@ $(HIP_FLAGS)
 
 $O/%.cudacc.o: $S/%.c ${SETUP}/config.h
 	${CC} -c $(CPPFLAGS) $(CFLAGS) $(MPI_INCLUDES) -o $@ $<

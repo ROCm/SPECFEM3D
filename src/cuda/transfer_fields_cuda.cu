@@ -49,9 +49,9 @@ void FC_FUNC_(transfer_fields_el_to_device,
 
   Mesh* mp = (Mesh*)(*Mesh_pointer); //get mesh pointer out of fortran integer container
 
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_displ,displ,sizeof(realw)*(*size),cudaMemcpyHostToDevice),40003);
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_veloc,veloc,sizeof(realw)*(*size),cudaMemcpyHostToDevice),40004);
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_accel,accel,sizeof(realw)*(*size),cudaMemcpyHostToDevice),40005);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_displ,displ,sizeof(realw)*(*size),hipMemcpyHostToDevice),40003);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_veloc,veloc,sizeof(realw)*(*size),hipMemcpyHostToDevice),40004);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_accel,accel,sizeof(realw)*(*size),hipMemcpyHostToDevice),40005);
 
 }
 
@@ -65,9 +65,9 @@ void FC_FUNC_(transfer_fields_el_from_device,
 
   Mesh* mp = (Mesh*)(*Mesh_pointer); //get mesh pointer out of fortran integer container
 
-  print_CUDA_error_if_any(cudaMemcpy(displ,mp->d_displ,sizeof(realw)*(*size),cudaMemcpyDeviceToHost),40006);
-  print_CUDA_error_if_any(cudaMemcpy(veloc,mp->d_veloc,sizeof(realw)*(*size),cudaMemcpyDeviceToHost),40007);
-  print_CUDA_error_if_any(cudaMemcpy(accel,mp->d_accel,sizeof(realw)*(*size),cudaMemcpyDeviceToHost),40008);
+  print_CUDA_error_if_any(hipMemcpy(displ,mp->d_displ,sizeof(realw)*(*size),hipMemcpyDeviceToHost),40006);
+  print_CUDA_error_if_any(hipMemcpy(veloc,mp->d_veloc,sizeof(realw)*(*size),hipMemcpyDeviceToHost),40007);
+  print_CUDA_error_if_any(hipMemcpy(accel,mp->d_accel,sizeof(realw)*(*size),hipMemcpyDeviceToHost),40008);
 
 }
 
@@ -82,9 +82,9 @@ void FC_FUNC_(transfer_b_fields_to_device,
 
   Mesh* mp = (Mesh*)(*Mesh_pointer); //get mesh pointer out of fortran integer container
 
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_b_displ,b_displ,sizeof(realw)*(*size),cudaMemcpyHostToDevice),41006);
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_b_veloc,b_veloc,sizeof(realw)*(*size),cudaMemcpyHostToDevice),41007);
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_b_accel,b_accel,sizeof(realw)*(*size),cudaMemcpyHostToDevice),41008);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_b_displ,b_displ,sizeof(realw)*(*size),hipMemcpyHostToDevice),41006);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_b_veloc,b_veloc,sizeof(realw)*(*size),hipMemcpyHostToDevice),41007);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_b_accel,b_accel,sizeof(realw)*(*size),hipMemcpyHostToDevice),41008);
 
 }
 
@@ -98,9 +98,9 @@ void FC_FUNC_(transfer_b_fields_from_device,
 
   Mesh* mp = (Mesh*)(*Mesh_pointer); //get mesh pointer out of fortran integer container
 
-  print_CUDA_error_if_any(cudaMemcpy(b_displ,mp->d_b_displ,sizeof(realw)*(*size),cudaMemcpyDeviceToHost),42006);
-  print_CUDA_error_if_any(cudaMemcpy(b_veloc,mp->d_b_veloc,sizeof(realw)*(*size),cudaMemcpyDeviceToHost),42007);
-  print_CUDA_error_if_any(cudaMemcpy(b_accel,mp->d_b_accel,sizeof(realw)*(*size),cudaMemcpyDeviceToHost),42008);
+  print_CUDA_error_if_any(hipMemcpy(b_displ,mp->d_b_displ,sizeof(realw)*(*size),hipMemcpyDeviceToHost),42006);
+  print_CUDA_error_if_any(hipMemcpy(b_veloc,mp->d_b_veloc,sizeof(realw)*(*size),hipMemcpyDeviceToHost),42007);
+  print_CUDA_error_if_any(hipMemcpy(b_accel,mp->d_b_accel,sizeof(realw)*(*size),hipMemcpyDeviceToHost),42008);
 
 }
 
@@ -114,7 +114,7 @@ void FC_FUNC_(transfer_veloc_from_device,
 
   Mesh* mp = (Mesh*)(*Mesh_pointer); //get mesh pointer out of fortran integer container
 
-  print_CUDA_error_if_any(cudaMemcpy(veloc,mp->d_veloc,sizeof(realw)*(*size),cudaMemcpyDeviceToHost),40009);
+  print_CUDA_error_if_any(hipMemcpy(veloc,mp->d_veloc,sizeof(realw)*(*size),hipMemcpyDeviceToHost),40009);
 
 }
 
@@ -128,7 +128,7 @@ void FC_FUNC_(transfer_b_veloc_from_device,
 
   Mesh* mp = (Mesh*)(*Mesh_pointer); //get mesh pointer out of fortran integer container
 
-  print_CUDA_error_if_any(cudaMemcpy(b_veloc,mp->d_b_veloc,sizeof(realw)*(*size),cudaMemcpyDeviceToHost),40010);
+  print_CUDA_error_if_any(hipMemcpy(b_veloc,mp->d_b_veloc,sizeof(realw)*(*size),hipMemcpyDeviceToHost),40010);
 
 }
 
@@ -142,7 +142,7 @@ void FC_FUNC_(transfer_b_veloc_to_device,
 
   Mesh* mp = (Mesh*)(*Mesh_pointer); //get mesh pointer out of fortran integer container
 
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_b_veloc,b_veloc,sizeof(realw)*(*size),cudaMemcpyHostToDevice),40011);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_b_veloc,b_veloc,sizeof(realw)*(*size),hipMemcpyHostToDevice),40011);
 
 }
 
@@ -156,7 +156,7 @@ void FC_FUNC_(transfer_accel_to_device,
 
   Mesh* mp = (Mesh*)(*Mesh_pointer); //get mesh pointer out of fortran integer container
 
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_accel,accel,sizeof(realw)*(*size),cudaMemcpyHostToDevice),40016);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_accel,accel,sizeof(realw)*(*size),hipMemcpyHostToDevice),40016);
 
 }
 
@@ -170,7 +170,7 @@ void FC_FUNC_(transfer_accel_from_device,
 
   Mesh* mp = (Mesh*)(*Mesh_pointer); //get mesh pointer out of fortran integer container
 
-  print_CUDA_error_if_any(cudaMemcpy(accel,mp->d_accel,sizeof(realw)*(*size),cudaMemcpyDeviceToHost),40026);
+  print_CUDA_error_if_any(hipMemcpy(accel,mp->d_accel,sizeof(realw)*(*size),hipMemcpyDeviceToHost),40026);
 
 }
 
@@ -184,7 +184,7 @@ void FC_FUNC_(transfer_b_accel_from_device,
 
   Mesh* mp = (Mesh*)(*Mesh_pointer); //get mesh pointer out of fortran integer container
 
-  print_CUDA_error_if_any(cudaMemcpy(b_accel,mp->d_b_accel,sizeof(realw)*(*size),cudaMemcpyDeviceToHost),40036);
+  print_CUDA_error_if_any(hipMemcpy(b_accel,mp->d_b_accel,sizeof(realw)*(*size),hipMemcpyDeviceToHost),40036);
 
 }
 
@@ -198,7 +198,7 @@ void FC_FUNC_(transfer_b_accel_to_device,
 
   Mesh* mp = (Mesh*)(*Mesh_pointer); //get mesh pointer out of fortran integer container
 
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_b_accel,b_accel,sizeof(realw)*(*size),cudaMemcpyHostToDevice),40057);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_b_accel,b_accel,sizeof(realw)*(*size),hipMemcpyHostToDevice),40057);
 
 }
 
@@ -212,7 +212,7 @@ void FC_FUNC_(transfer_sigma_from_device,
 
   Mesh* mp = (Mesh*)(*Mesh_pointer); //get mesh pointer out of fortran integer container
 
-  print_CUDA_error_if_any(cudaMemcpy(sigma_kl,mp->d_sigma_kl,sizeof(realw)*(*size),cudaMemcpyDeviceToHost),40046);
+  print_CUDA_error_if_any(hipMemcpy(sigma_kl,mp->d_sigma_kl,sizeof(realw)*(*size),hipMemcpyDeviceToHost),40046);
 
 }
 
@@ -226,7 +226,7 @@ void FC_FUNC_(transfer_b_displ_from_device,
 
   Mesh* mp = (Mesh*)(*Mesh_pointer); //get mesh pointer out of fortran integer container
 
-  print_CUDA_error_if_any(cudaMemcpy(b_displ,mp->d_b_displ,sizeof(realw)*(*size),cudaMemcpyDeviceToHost),40056);
+  print_CUDA_error_if_any(hipMemcpy(b_displ,mp->d_b_displ,sizeof(realw)*(*size),hipMemcpyDeviceToHost),40056);
 
 }
 
@@ -240,7 +240,7 @@ void FC_FUNC_(transfer_b_displ_to_device,
 
   Mesh* mp = (Mesh*)(*Mesh_pointer); //get mesh pointer out of fortran integer container
 
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_b_displ,b_displ,sizeof(realw)*(*size),cudaMemcpyHostToDevice),40057);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_b_displ,b_displ,sizeof(realw)*(*size),hipMemcpyHostToDevice),40057);
 
 }
 
@@ -254,7 +254,7 @@ void FC_FUNC_(transfer_displ_from_device,
 
   Mesh* mp = (Mesh*)(*Mesh_pointer); //get mesh pointer out of fortran integer container
 
-  print_CUDA_error_if_any(cudaMemcpy(displ,mp->d_displ,sizeof(realw)*(*size),cudaMemcpyDeviceToHost),40066);
+  print_CUDA_error_if_any(hipMemcpy(displ,mp->d_displ,sizeof(realw)*(*size),hipMemcpyDeviceToHost),40066);
 
 }
 
@@ -278,19 +278,19 @@ void FC_FUNC_(transfer_b_fields_att_to_device,
   //get mesh pointer out of fortran integer container
   Mesh* mp = (Mesh*)(*Mesh_pointer);
 
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_b_R_xx,b_R_xx,*size_R*sizeof(realw),cudaMemcpyHostToDevice),43011);
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_b_R_yy,b_R_yy,*size_R*sizeof(realw),cudaMemcpyHostToDevice),43012);
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_b_R_xy,b_R_xy,*size_R*sizeof(realw),cudaMemcpyHostToDevice),43013);
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_b_R_xz,b_R_xz,*size_R*sizeof(realw),cudaMemcpyHostToDevice),43014);
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_b_R_yz,b_R_yz,*size_R*sizeof(realw),cudaMemcpyHostToDevice),43015);
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_b_R_trace,b_R_trace,*size_R*sizeof(realw),cudaMemcpyHostToDevice),43016);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_b_R_xx,b_R_xx,*size_R*sizeof(realw),hipMemcpyHostToDevice),43011);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_b_R_yy,b_R_yy,*size_R*sizeof(realw),hipMemcpyHostToDevice),43012);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_b_R_xy,b_R_xy,*size_R*sizeof(realw),hipMemcpyHostToDevice),43013);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_b_R_xz,b_R_xz,*size_R*sizeof(realw),hipMemcpyHostToDevice),43014);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_b_R_yz,b_R_yz,*size_R*sizeof(realw),hipMemcpyHostToDevice),43015);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_b_R_trace,b_R_trace,*size_R*sizeof(realw),hipMemcpyHostToDevice),43016);
 
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_b_epsilondev_xx,b_epsilondev_xx,*size_epsilondev*sizeof(realw),cudaMemcpyHostToDevice),43116);
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_b_epsilondev_yy,b_epsilondev_yy,*size_epsilondev*sizeof(realw),cudaMemcpyHostToDevice),43117);
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_b_epsilondev_xy,b_epsilondev_xy,*size_epsilondev*sizeof(realw),cudaMemcpyHostToDevice),43118);
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_b_epsilondev_xz,b_epsilondev_xz,*size_epsilondev*sizeof(realw),cudaMemcpyHostToDevice),43119);
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_b_epsilondev_yz,b_epsilondev_yz,*size_epsilondev*sizeof(realw),cudaMemcpyHostToDevice),43120);
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_b_epsilondev_trace,b_epsilondev_trace,*size_epsilondev*sizeof(realw),cudaMemcpyHostToDevice),43121);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_b_epsilondev_xx,b_epsilondev_xx,*size_epsilondev*sizeof(realw),hipMemcpyHostToDevice),43116);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_b_epsilondev_yy,b_epsilondev_yy,*size_epsilondev*sizeof(realw),hipMemcpyHostToDevice),43117);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_b_epsilondev_xy,b_epsilondev_xy,*size_epsilondev*sizeof(realw),hipMemcpyHostToDevice),43118);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_b_epsilondev_xz,b_epsilondev_xz,*size_epsilondev*sizeof(realw),hipMemcpyHostToDevice),43119);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_b_epsilondev_yz,b_epsilondev_yz,*size_epsilondev*sizeof(realw),hipMemcpyHostToDevice),43120);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_b_epsilondev_trace,b_epsilondev_trace,*size_epsilondev*sizeof(realw),hipMemcpyHostToDevice),43121);
 
   GPU_ERROR_CHECKING("after transfer_b_fields_att_to_device");
 }
@@ -313,19 +313,19 @@ void FC_FUNC_(transfer_fields_att_from_device,
   //get mesh pointer out of fortran integer container
   Mesh* mp = (Mesh*)(*Mesh_pointer);
 
-  print_CUDA_error_if_any(cudaMemcpy(R_xx,mp->d_R_xx,*size_R*sizeof(realw),cudaMemcpyDeviceToHost),43021);
-  print_CUDA_error_if_any(cudaMemcpy(R_yy,mp->d_R_yy,*size_R*sizeof(realw),cudaMemcpyDeviceToHost),43022);
-  print_CUDA_error_if_any(cudaMemcpy(R_xy,mp->d_R_xy,*size_R*sizeof(realw),cudaMemcpyDeviceToHost),43023);
-  print_CUDA_error_if_any(cudaMemcpy(R_xz,mp->d_R_xz,*size_R*sizeof(realw),cudaMemcpyDeviceToHost),43024);
-  print_CUDA_error_if_any(cudaMemcpy(R_yz,mp->d_R_yz,*size_R*sizeof(realw),cudaMemcpyDeviceToHost),43025);
-  print_CUDA_error_if_any(cudaMemcpy(R_trace,mp->d_R_trace,*size_R*sizeof(realw),cudaMemcpyDeviceToHost),43026);
+  print_CUDA_error_if_any(hipMemcpy(R_xx,mp->d_R_xx,*size_R*sizeof(realw),hipMemcpyDeviceToHost),43021);
+  print_CUDA_error_if_any(hipMemcpy(R_yy,mp->d_R_yy,*size_R*sizeof(realw),hipMemcpyDeviceToHost),43022);
+  print_CUDA_error_if_any(hipMemcpy(R_xy,mp->d_R_xy,*size_R*sizeof(realw),hipMemcpyDeviceToHost),43023);
+  print_CUDA_error_if_any(hipMemcpy(R_xz,mp->d_R_xz,*size_R*sizeof(realw),hipMemcpyDeviceToHost),43024);
+  print_CUDA_error_if_any(hipMemcpy(R_yz,mp->d_R_yz,*size_R*sizeof(realw),hipMemcpyDeviceToHost),43025);
+  print_CUDA_error_if_any(hipMemcpy(R_trace,mp->d_R_trace,*size_R*sizeof(realw),hipMemcpyDeviceToHost),43026);
 
-  print_CUDA_error_if_any(cudaMemcpy(epsilondev_xx,mp->d_epsilondev_xx,*size_epsilondev*sizeof(realw),cudaMemcpyDeviceToHost),43126);
-  print_CUDA_error_if_any(cudaMemcpy(epsilondev_yy,mp->d_epsilondev_yy,*size_epsilondev*sizeof(realw),cudaMemcpyDeviceToHost),43127);
-  print_CUDA_error_if_any(cudaMemcpy(epsilondev_xy,mp->d_epsilondev_xy,*size_epsilondev*sizeof(realw),cudaMemcpyDeviceToHost),43128);
-  print_CUDA_error_if_any(cudaMemcpy(epsilondev_xz,mp->d_epsilondev_xz,*size_epsilondev*sizeof(realw),cudaMemcpyDeviceToHost),43129);
-  print_CUDA_error_if_any(cudaMemcpy(epsilondev_yz,mp->d_epsilondev_yz,*size_epsilondev*sizeof(realw),cudaMemcpyDeviceToHost),43130);
-  print_CUDA_error_if_any(cudaMemcpy(epsilondev_trace,mp->d_epsilondev_trace,*size_epsilondev*sizeof(realw),cudaMemcpyDeviceToHost),43131);
+  print_CUDA_error_if_any(hipMemcpy(epsilondev_xx,mp->d_epsilondev_xx,*size_epsilondev*sizeof(realw),hipMemcpyDeviceToHost),43126);
+  print_CUDA_error_if_any(hipMemcpy(epsilondev_yy,mp->d_epsilondev_yy,*size_epsilondev*sizeof(realw),hipMemcpyDeviceToHost),43127);
+  print_CUDA_error_if_any(hipMemcpy(epsilondev_xy,mp->d_epsilondev_xy,*size_epsilondev*sizeof(realw),hipMemcpyDeviceToHost),43128);
+  print_CUDA_error_if_any(hipMemcpy(epsilondev_xz,mp->d_epsilondev_xz,*size_epsilondev*sizeof(realw),hipMemcpyDeviceToHost),43129);
+  print_CUDA_error_if_any(hipMemcpy(epsilondev_yz,mp->d_epsilondev_yz,*size_epsilondev*sizeof(realw),hipMemcpyDeviceToHost),43130);
+  print_CUDA_error_if_any(hipMemcpy(epsilondev_trace,mp->d_epsilondev_trace,*size_epsilondev*sizeof(realw),hipMemcpyDeviceToHost),43131);
 
   GPU_ERROR_CHECKING("after transfer_fields_att_from_device");
 }
@@ -347,16 +347,16 @@ void FC_FUNC_(transfer_kernels_el_to_host,
   //get mesh pointer out of fortran integer container
   Mesh* mp = (Mesh*)(*Mesh_pointer);
 
-  print_CUDA_error_if_any(cudaMemcpy(h_rho_kl,mp->d_rho_kl,*NSPEC_AB*NGLL3*sizeof(realw),
-                                     cudaMemcpyDeviceToHost),40101);
+  print_CUDA_error_if_any(hipMemcpy(h_rho_kl,mp->d_rho_kl,*NSPEC_AB*NGLL3*sizeof(realw),
+                                     hipMemcpyDeviceToHost),40101);
   if (mp->anisotropic_kl ){
-    print_CUDA_error_if_any(cudaMemcpy(h_cijkl_kl,mp->d_cijkl_kl,*NSPEC_AB*21*NGLL3*sizeof(realw),
-                                       cudaMemcpyDeviceToHost),40102);
+    print_CUDA_error_if_any(hipMemcpy(h_cijkl_kl,mp->d_cijkl_kl,*NSPEC_AB*21*NGLL3*sizeof(realw),
+                                       hipMemcpyDeviceToHost),40102);
   }else{
-    print_CUDA_error_if_any(cudaMemcpy(h_mu_kl,mp->d_mu_kl,*NSPEC_AB*NGLL3*sizeof(realw),
-                                       cudaMemcpyDeviceToHost),40102);
-    print_CUDA_error_if_any(cudaMemcpy(h_kappa_kl,mp->d_kappa_kl,*NSPEC_AB*NGLL3*sizeof(realw),
-                                       cudaMemcpyDeviceToHost),40103);
+    print_CUDA_error_if_any(hipMemcpy(h_mu_kl,mp->d_mu_kl,*NSPEC_AB*NGLL3*sizeof(realw),
+                                       hipMemcpyDeviceToHost),40102);
+    print_CUDA_error_if_any(hipMemcpy(h_kappa_kl,mp->d_kappa_kl,*NSPEC_AB*NGLL3*sizeof(realw),
+                                       hipMemcpyDeviceToHost),40103);
   }
 }
 
@@ -376,8 +376,8 @@ void FC_FUNC_(transfer_kernels_noise_to_host,
   //get mesh pointer out of fortran integer container
   Mesh* mp = (Mesh*)(*Mesh_pointer);
 
-  print_CUDA_error_if_any(cudaMemcpy(h_sigma_kl,mp->d_sigma_kl,NGLL3*(*NSPEC_AB)*sizeof(realw),
-                                     cudaMemcpyDeviceToHost),40201);
+  print_CUDA_error_if_any(hipMemcpy(h_sigma_kl,mp->d_sigma_kl,NGLL3*(*NSPEC_AB)*sizeof(realw),
+                                     hipMemcpyDeviceToHost),40201);
 
 }
 
@@ -401,12 +401,12 @@ void FC_FUNC_(transfer_fields_ac_to_device,
   //get mesh pointer out of fortran integer container
   Mesh* mp = (Mesh*)(*Mesh_pointer);
 
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_potential_acoustic,potential_acoustic,
-                                     sizeof(field)*(*size),cudaMemcpyHostToDevice),50110);
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_potential_dot_acoustic,potential_dot_acoustic,
-                                     sizeof(field)*(*size),cudaMemcpyHostToDevice),50120);
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_potential_dot_dot_acoustic,potential_dot_dot_acoustic,
-                                     sizeof(field)*(*size),cudaMemcpyHostToDevice),50130);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_potential_acoustic,potential_acoustic,
+                                     sizeof(field)*(*size),hipMemcpyHostToDevice),50110);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_potential_dot_acoustic,potential_dot_acoustic,
+                                     sizeof(field)*(*size),hipMemcpyHostToDevice),50120);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_potential_dot_dot_acoustic,potential_dot_dot_acoustic,
+                                     sizeof(field)*(*size),hipMemcpyHostToDevice),50130);
 
   GPU_ERROR_CHECKING("after transfer_fields_ac_to_device");
 }
@@ -426,12 +426,12 @@ void FC_FUNC_(transfer_b_fields_ac_to_device,
   //get mesh pointer out of fortran integer container
   Mesh* mp = (Mesh*)(*Mesh_pointer);
 
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_b_potential_acoustic,b_potential_acoustic,
-                                     sizeof(field)*(*size),cudaMemcpyHostToDevice),51110);
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_b_potential_dot_acoustic,b_potential_dot_acoustic,
-                                     sizeof(field)*(*size),cudaMemcpyHostToDevice),51120);
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_b_potential_dot_dot_acoustic,b_potential_dot_dot_acoustic,
-                                     sizeof(field)*(*size),cudaMemcpyHostToDevice),51130);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_b_potential_acoustic,b_potential_acoustic,
+                                     sizeof(field)*(*size),hipMemcpyHostToDevice),51110);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_b_potential_dot_acoustic,b_potential_dot_acoustic,
+                                     sizeof(field)*(*size),hipMemcpyHostToDevice),51120);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_b_potential_dot_dot_acoustic,b_potential_dot_dot_acoustic,
+                                     sizeof(field)*(*size),hipMemcpyHostToDevice),51130);
 
   GPU_ERROR_CHECKING("after transfer_b_fields_ac_to_device");
 }
@@ -451,12 +451,12 @@ void FC_FUNC_(transfer_fields_ac_from_device,
   //get mesh pointer out of fortran integer container
   Mesh* mp = (Mesh*)(*Mesh_pointer);
 
-  print_CUDA_error_if_any(cudaMemcpy(potential_acoustic,mp->d_potential_acoustic,
-                                     sizeof(field)*(*size),cudaMemcpyDeviceToHost),52111);
-  print_CUDA_error_if_any(cudaMemcpy(potential_dot_acoustic,mp->d_potential_dot_acoustic,
-                                     sizeof(field)*(*size),cudaMemcpyDeviceToHost),52121);
-  print_CUDA_error_if_any(cudaMemcpy(potential_dot_dot_acoustic,mp->d_potential_dot_dot_acoustic,
-                                     sizeof(field)*(*size),cudaMemcpyDeviceToHost),52131);
+  print_CUDA_error_if_any(hipMemcpy(potential_acoustic,mp->d_potential_acoustic,
+                                     sizeof(field)*(*size),hipMemcpyDeviceToHost),52111);
+  print_CUDA_error_if_any(hipMemcpy(potential_dot_acoustic,mp->d_potential_dot_acoustic,
+                                     sizeof(field)*(*size),hipMemcpyDeviceToHost),52121);
+  print_CUDA_error_if_any(hipMemcpy(potential_dot_dot_acoustic,mp->d_potential_dot_dot_acoustic,
+                                     sizeof(field)*(*size),hipMemcpyDeviceToHost),52131);
 
   GPU_ERROR_CHECKING("after transfer_fields_ac_from_device");
 }
@@ -475,12 +475,12 @@ void FC_FUNC_(transfer_b_fields_ac_from_device,
   //get mesh pointer out of fortran integer container
   Mesh* mp = (Mesh*)(*Mesh_pointer);
 
-  print_CUDA_error_if_any(cudaMemcpy(b_potential_acoustic,mp->d_b_potential_acoustic,
-                                     sizeof(field)*(*size),cudaMemcpyDeviceToHost),53111);
-  print_CUDA_error_if_any(cudaMemcpy(b_potential_dot_acoustic,mp->d_b_potential_dot_acoustic,
-                                     sizeof(field)*(*size),cudaMemcpyDeviceToHost),53121);
-  print_CUDA_error_if_any(cudaMemcpy(b_potential_dot_dot_acoustic,mp->d_b_potential_dot_dot_acoustic,
-                                     sizeof(field)*(*size),cudaMemcpyDeviceToHost),53131);
+  print_CUDA_error_if_any(hipMemcpy(b_potential_acoustic,mp->d_b_potential_acoustic,
+                                     sizeof(field)*(*size),hipMemcpyDeviceToHost),53111);
+  print_CUDA_error_if_any(hipMemcpy(b_potential_dot_acoustic,mp->d_b_potential_dot_acoustic,
+                                     sizeof(field)*(*size),hipMemcpyDeviceToHost),53121);
+  print_CUDA_error_if_any(hipMemcpy(b_potential_dot_dot_acoustic,mp->d_b_potential_dot_dot_acoustic,
+                                     sizeof(field)*(*size),hipMemcpyDeviceToHost),53131);
 
   GPU_ERROR_CHECKING("after transfer_b_fields_ac_from_device");
 }
@@ -497,8 +497,8 @@ void FC_FUNC_(transfer_b_potential_ac_from_device,
   //get mesh pointer out of fortran integer container
   Mesh* mp = (Mesh*)(*Mesh_pointer);
 
-  print_CUDA_error_if_any(cudaMemcpy(b_potential_acoustic,mp->d_b_potential_acoustic,
-                                     sizeof(field)*(*size),cudaMemcpyDeviceToHost),53111);
+  print_CUDA_error_if_any(hipMemcpy(b_potential_acoustic,mp->d_b_potential_acoustic,
+                                     sizeof(field)*(*size),hipMemcpyDeviceToHost),53111);
 
   GPU_ERROR_CHECKING("after transfer_b_potential_ac_from_device");
 }
@@ -515,8 +515,8 @@ void FC_FUNC_(transfer_b_potential_dot_dot_ac_from_device,
   //get mesh pointer out of fortran integer container
   Mesh* mp = (Mesh*)(*Mesh_pointer);
 
-  print_CUDA_error_if_any(cudaMemcpy(b_potential_dot_dot_acoustic,mp->d_b_potential_dot_dot_acoustic,
-                                     sizeof(field)*(*size),cudaMemcpyDeviceToHost),53112);
+  print_CUDA_error_if_any(hipMemcpy(b_potential_dot_dot_acoustic,mp->d_b_potential_dot_dot_acoustic,
+                                     sizeof(field)*(*size),hipMemcpyDeviceToHost),53112);
 
   GPU_ERROR_CHECKING("after transfer_b_potential_dot_dot_ac_from_device");
 }
@@ -533,8 +533,8 @@ void FC_FUNC_(transfer_b_potential_ac_to_device,
   //get mesh pointer out of fortran integer container
   Mesh* mp = (Mesh*)(*Mesh_pointer);
 
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_b_potential_acoustic,b_potential_acoustic,
-                                     sizeof(field)*(*size),cudaMemcpyHostToDevice),53112);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_b_potential_acoustic,b_potential_acoustic,
+                                     sizeof(field)*(*size),hipMemcpyHostToDevice),53112);
 
   GPU_ERROR_CHECKING("after transfer_b_potential_ac_to_device");
 }
@@ -551,8 +551,8 @@ void FC_FUNC_(transfer_b_potential_dot_dot_ac_to_device,
   //get mesh pointer out of fortran integer container
   Mesh* mp = (Mesh*)(*Mesh_pointer);
 
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_b_potential_dot_dot_acoustic,b_potential_dot_dot_acoustic,
-                                     sizeof(field)*(*size),cudaMemcpyHostToDevice),53113);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_b_potential_dot_dot_acoustic,b_potential_dot_dot_acoustic,
+                                     sizeof(field)*(*size),hipMemcpyHostToDevice),53113);
 
   GPU_ERROR_CHECKING("after transfer_b_potential_dot_dot_ac_to_device");
 }
@@ -568,8 +568,8 @@ void FC_FUNC_(transfer_dot_dot_from_device,
   //get mesh pointer out of fortran integer container
   Mesh* mp = (Mesh*)(*Mesh_pointer);
 
-  print_CUDA_error_if_any(cudaMemcpy(potential_dot_dot_acoustic,mp->d_potential_dot_dot_acoustic,
-                                     sizeof(field)*(*size),cudaMemcpyDeviceToHost),50041);
+  print_CUDA_error_if_any(hipMemcpy(potential_dot_dot_acoustic,mp->d_potential_dot_dot_acoustic,
+                                     sizeof(field)*(*size),hipMemcpyDeviceToHost),50041);
 
 }
 
@@ -584,8 +584,8 @@ void FC_FUNC_(transfer_b_dot_dot_from_device,
   //get mesh pointer out of fortran integer container
   Mesh* mp = (Mesh*)(*Mesh_pointer);
 
-  print_CUDA_error_if_any(cudaMemcpy(b_potential_dot_dot_acoustic,mp->d_b_potential_dot_dot_acoustic,
-                                     sizeof(field)*(*size),cudaMemcpyDeviceToHost),50042);
+  print_CUDA_error_if_any(hipMemcpy(b_potential_dot_dot_acoustic,mp->d_b_potential_dot_dot_acoustic,
+                                     sizeof(field)*(*size),hipMemcpyDeviceToHost),50042);
 
 }
 
@@ -604,10 +604,10 @@ void FC_FUNC_(transfer_kernels_ac_to_host,
   int size = *NSPEC_AB*NGLL3;
 
   // copies kernel values over to CPU host
-  print_CUDA_error_if_any(cudaMemcpy(h_rho_ac_kl,mp->d_rho_ac_kl,size*sizeof(realw),
-                                     cudaMemcpyDeviceToHost),54101);
-  print_CUDA_error_if_any(cudaMemcpy(h_kappa_ac_kl,mp->d_kappa_ac_kl,size*sizeof(realw),
-                                     cudaMemcpyDeviceToHost),54102);
+  print_CUDA_error_if_any(hipMemcpy(h_rho_ac_kl,mp->d_rho_ac_kl,size*sizeof(realw),
+                                     hipMemcpyDeviceToHost),54101);
+  print_CUDA_error_if_any(hipMemcpy(h_kappa_ac_kl,mp->d_kappa_ac_kl,size*sizeof(realw),
+                                     hipMemcpyDeviceToHost),54102);
 }
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -630,17 +630,17 @@ void FC_FUNC_(transfer_kernels_hess_el_tohost,
   //get mesh pointer out of fortran integer container
   Mesh* mp = (Mesh*)(*Mesh_pointer);
 
-  print_CUDA_error_if_any(cudaMemcpy(h_hess_kl,mp->d_hess_el_kl,NGLL3*(*NSPEC_AB)*sizeof(realw),
-                                     cudaMemcpyDeviceToHost),70201);
+  print_CUDA_error_if_any(hipMemcpy(h_hess_kl,mp->d_hess_el_kl,NGLL3*(*NSPEC_AB)*sizeof(realw),
+                                     hipMemcpyDeviceToHost),70201);
 
-  print_CUDA_error_if_any(cudaMemcpy(h_hess_rho_kl,mp->d_hess_rho_el_kl,NGLL3*(*NSPEC_AB)*sizeof(realw),
-                                     cudaMemcpyDeviceToHost),70202);
+  print_CUDA_error_if_any(hipMemcpy(h_hess_rho_kl,mp->d_hess_rho_el_kl,NGLL3*(*NSPEC_AB)*sizeof(realw),
+                                     hipMemcpyDeviceToHost),70202);
 
-  print_CUDA_error_if_any(cudaMemcpy(h_hess_kappa_kl,mp->d_hess_kappa_el_kl,NGLL3*(*NSPEC_AB)*sizeof(realw),
-              cudaMemcpyDeviceToHost),70203);
+  print_CUDA_error_if_any(hipMemcpy(h_hess_kappa_kl,mp->d_hess_kappa_el_kl,NGLL3*(*NSPEC_AB)*sizeof(realw),
+              hipMemcpyDeviceToHost),70203);
 
-  print_CUDA_error_if_any(cudaMemcpy(h_hess_mu_kl,mp->d_hess_mu_el_kl,NGLL3*(*NSPEC_AB)*sizeof(realw),
-             cudaMemcpyDeviceToHost),70204);
+  print_CUDA_error_if_any(hipMemcpy(h_hess_mu_kl,mp->d_hess_mu_el_kl,NGLL3*(*NSPEC_AB)*sizeof(realw),
+             hipMemcpyDeviceToHost),70204);
 
   //printf("%e %e \n",h_hess_kappa_kl[125], h_hess_mu_kl[125]);
 }
@@ -660,14 +660,14 @@ void FC_FUNC_(transfer_kernels_hess_ac_tohost,
   //get mesh pointer out of fortran integer container
   Mesh* mp = (Mesh*)(*Mesh_pointer);
 
-  print_CUDA_error_if_any(cudaMemcpy(h_hess_ac_kl,mp->d_hess_ac_kl,NGLL3*(*NSPEC_AB)*sizeof(realw),
-                                     cudaMemcpyDeviceToHost),70212);
+  print_CUDA_error_if_any(hipMemcpy(h_hess_ac_kl,mp->d_hess_ac_kl,NGLL3*(*NSPEC_AB)*sizeof(realw),
+                                     hipMemcpyDeviceToHost),70212);
 
-  print_CUDA_error_if_any(cudaMemcpy(h_hess_rho_ac_kl,mp->d_hess_rho_ac_kl,NGLL3*(*NSPEC_AB)*sizeof(realw),
-                                     cudaMemcpyDeviceToHost),70213);
+  print_CUDA_error_if_any(hipMemcpy(h_hess_rho_ac_kl,mp->d_hess_rho_ac_kl,NGLL3*(*NSPEC_AB)*sizeof(realw),
+                                     hipMemcpyDeviceToHost),70213);
 
-  print_CUDA_error_if_any(cudaMemcpy(h_hess_kappa_ac_kl,mp->d_hess_kappa_ac_kl,NGLL3*(*NSPEC_AB)*sizeof(realw),
-                                     cudaMemcpyDeviceToHost),70214);
+  print_CUDA_error_if_any(hipMemcpy(h_hess_kappa_ac_kl,mp->d_hess_kappa_ac_kl,NGLL3*(*NSPEC_AB)*sizeof(realw),
+                                     hipMemcpyDeviceToHost),70214);
 
 }
 
@@ -684,10 +684,10 @@ void FC_FUNC_(transfer_compute_kernel_answers_from_device,
 TRACE("transfer_compute_kernel_answers_from_device");
 
   Mesh* mp = (Mesh*)(*Mesh_pointer); //get mesh pointer out of fortran integer container
-  cudaMemcpy(rho_kl,mp->d_rho_kl,*size_rho*sizeof(realw),cudaMemcpyDeviceToHost);
+  hipMemcpy(rho_kl,mp->d_rho_kl,*size_rho*sizeof(realw),hipMemcpyDeviceToHost);
   if (! mp->anisotropic_kl ){
-    cudaMemcpy(mu_kl,mp->d_mu_kl,*size_mu*sizeof(realw),cudaMemcpyDeviceToHost);
-    cudaMemcpy(kappa_kl,mp->d_kappa_kl,*size_kappa*sizeof(realw),cudaMemcpyDeviceToHost);
+    hipMemcpy(mu_kl,mp->d_mu_kl,*size_mu*sizeof(realw),hipMemcpyDeviceToHost);
+    hipMemcpy(kappa_kl,mp->d_kappa_kl,*size_kappa*sizeof(realw),hipMemcpyDeviceToHost);
   }
 }
 */
@@ -714,29 +714,29 @@ void FC_FUNC_(transfer_compute_kernel_fields_from_device,
 TRACE("transfer_compute_kernel_fields_from_device");
 
   Mesh* mp = (Mesh*)(*Mesh_pointer); //get mesh pointer out of fortran integer container
-  cudaMemcpy(accel,mp->d_accel,*size_accel*sizeof(realw),cudaMemcpyDeviceToHost);
-  cudaMemcpy(b_displ,mp->d_b_displ,*size_b_displ*sizeof(realw),cudaMemcpyDeviceToHost);
-  cudaMemcpy(epsilondev_xx,mp->d_epsilondev_xx,*size_epsilondev*sizeof(realw),cudaMemcpyDeviceToHost);
-  cudaMemcpy(epsilondev_yy,mp->d_epsilondev_yy,*size_epsilondev*sizeof(realw),cudaMemcpyDeviceToHost);
-  cudaMemcpy(epsilondev_xy,mp->d_epsilondev_xy,*size_epsilondev*sizeof(realw),cudaMemcpyDeviceToHost);
-  cudaMemcpy(epsilondev_xz,mp->d_epsilondev_xz,*size_epsilondev*sizeof(realw),cudaMemcpyDeviceToHost);
-  cudaMemcpy(epsilondev_yz,mp->d_epsilondev_yz,*size_epsilondev*sizeof(realw),cudaMemcpyDeviceToHost);
-  cudaMemcpy(b_epsilondev_xx,mp->d_b_epsilondev_xx,*size_b_epsilondev*sizeof(realw),cudaMemcpyDeviceToHost);
-  cudaMemcpy(b_epsilondev_yy,mp->d_b_epsilondev_yy,*size_b_epsilondev*sizeof(realw),cudaMemcpyDeviceToHost);
-  cudaMemcpy(b_epsilondev_xy,mp->d_b_epsilondev_xy,*size_b_epsilondev*sizeof(realw),cudaMemcpyDeviceToHost);
-  cudaMemcpy(b_epsilondev_xz,mp->d_b_epsilondev_xz,*size_b_epsilondev*sizeof(realw),cudaMemcpyDeviceToHost);
-  cudaMemcpy(b_epsilondev_yz,mp->d_b_epsilondev_yz,*size_b_epsilondev*sizeof(realw),cudaMemcpyDeviceToHost);
-  cudaMemcpy(rho_kl,mp->d_rho_kl,*size_rho*sizeof(realw),cudaMemcpyDeviceToHost);
+  hipMemcpy(accel,mp->d_accel,*size_accel*sizeof(realw),hipMemcpyDeviceToHost);
+  hipMemcpy(b_displ,mp->d_b_displ,*size_b_displ*sizeof(realw),hipMemcpyDeviceToHost);
+  hipMemcpy(epsilondev_xx,mp->d_epsilondev_xx,*size_epsilondev*sizeof(realw),hipMemcpyDeviceToHost);
+  hipMemcpy(epsilondev_yy,mp->d_epsilondev_yy,*size_epsilondev*sizeof(realw),hipMemcpyDeviceToHost);
+  hipMemcpy(epsilondev_xy,mp->d_epsilondev_xy,*size_epsilondev*sizeof(realw),hipMemcpyDeviceToHost);
+  hipMemcpy(epsilondev_xz,mp->d_epsilondev_xz,*size_epsilondev*sizeof(realw),hipMemcpyDeviceToHost);
+  hipMemcpy(epsilondev_yz,mp->d_epsilondev_yz,*size_epsilondev*sizeof(realw),hipMemcpyDeviceToHost);
+  hipMemcpy(b_epsilondev_xx,mp->d_b_epsilondev_xx,*size_b_epsilondev*sizeof(realw),hipMemcpyDeviceToHost);
+  hipMemcpy(b_epsilondev_yy,mp->d_b_epsilondev_yy,*size_b_epsilondev*sizeof(realw),hipMemcpyDeviceToHost);
+  hipMemcpy(b_epsilondev_xy,mp->d_b_epsilondev_xy,*size_b_epsilondev*sizeof(realw),hipMemcpyDeviceToHost);
+  hipMemcpy(b_epsilondev_xz,mp->d_b_epsilondev_xz,*size_b_epsilondev*sizeof(realw),hipMemcpyDeviceToHost);
+  hipMemcpy(b_epsilondev_yz,mp->d_b_epsilondev_yz,*size_b_epsilondev*sizeof(realw),hipMemcpyDeviceToHost);
+  hipMemcpy(rho_kl,mp->d_rho_kl,*size_rho*sizeof(realw),hipMemcpyDeviceToHost);
 
   if (! mp->anisotropic_kl ){
-    cudaMemcpy(mu_kl,mp->d_mu_kl,*size_mu*sizeof(realw),cudaMemcpyDeviceToHost);
-    cudaMemcpy(kappa_kl,mp->d_kappa_kl,*size_kappa*sizeof(realw),cudaMemcpyDeviceToHost);
+    hipMemcpy(mu_kl,mp->d_mu_kl,*size_mu*sizeof(realw),hipMemcpyDeviceToHost);
+    hipMemcpy(kappa_kl,mp->d_kappa_kl,*size_kappa*sizeof(realw),hipMemcpyDeviceToHost);
   }
 
-  cudaMemcpy(epsilon_trace_over_3,mp->d_epsilon_trace_over_3,*size_epsilon_trace_over_3*sizeof(realw),
-       cudaMemcpyDeviceToHost);
-  cudaMemcpy(b_epsilon_trace_over_3,mp->d_b_epsilon_trace_over_3,*size_epsilon_trace_over_3*sizeof(realw),
-       cudaMemcpyDeviceToHost);
+  hipMemcpy(epsilon_trace_over_3,mp->d_epsilon_trace_over_3,*size_epsilon_trace_over_3*sizeof(realw),
+       hipMemcpyDeviceToHost);
+  hipMemcpy(b_epsilon_trace_over_3,mp->d_b_epsilon_trace_over_3,*size_epsilon_trace_over_3*sizeof(realw),
+       hipMemcpyDeviceToHost);
 
   GPU_ERROR_CHECKING("after transfer_compute_kernel_fields_from_device");
 }
@@ -751,14 +751,14 @@ void FC_FUNC_(register_host_array,
 
   TRACE("register_host_array");
 
-  // page-locks the memory to automatically accelerate calls to functions such as cudaMemcpy()
+  // page-locks the memory to automatically accelerate calls to functions such as hipMemcpy()
   // since the memory can be accessed directly by the device, it can be read or written with
   // much higher bandwidth than pageable memory that has not been registered.
   // Page-locking excessive amounts of memory may degrade system performance,
   // since it reduces the amount of memory available to the system for paging.
   // As a result, this function is best used sparingly to register staging areas for data exchange between host and device.
 
-  print_CUDA_error_if_any(cudaHostRegister(h_array, (*size)*sizeof(realw), 0),55001);
+  print_CUDA_error_if_any(hipHostRegister(h_array, (*size)*sizeof(realw), 0),55001);
 
   GPU_ERROR_CHECKING ("after register_host_array");
 }
@@ -770,7 +770,7 @@ void FC_FUNC_(unregister_host_array,
 
   TRACE("unregister_host_array");
 
-  print_CUDA_error_if_any(cudaHostUnregister(h_array),55002);
+  print_CUDA_error_if_any(hipHostUnregister(h_array),55002);
 
   GPU_ERROR_CHECKING ("after unregister_host_array");
 }

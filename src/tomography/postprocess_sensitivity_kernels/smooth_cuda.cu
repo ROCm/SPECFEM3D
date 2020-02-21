@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
 !=====================================================================
 !
@@ -34,13 +35,13 @@
 
 // copies integer array from CPU host to GPU device
 void copy_todevice_int(void** d_array_addr_ptr,int* h_array,int size){
-  cudaMalloc((void**)d_array_addr_ptr,size*sizeof(int));
-  cudaMemcpy((int*) *d_array_addr_ptr,h_array,size*sizeof(int),cudaMemcpyHostToDevice);
+  hipMalloc((void**)d_array_addr_ptr,size*sizeof(int));
+  hipMemcpy((int*) *d_array_addr_ptr,h_array,size*sizeof(int),hipMemcpyHostToDevice);
 }
 
 void copy_todevice_realw(void** d_array_addr_ptr,realw* h_array,int size){
-  cudaMalloc((void**)d_array_addr_ptr,size*sizeof(realw));
-  cudaMemcpy((realw*) *d_array_addr_ptr,h_array,size*sizeof(realw),cudaMemcpyHostToDevice);
+  hipMalloc((void**)d_array_addr_ptr,size*sizeof(realw));
+  hipMemcpy((realw*) *d_array_addr_ptr,h_array,size*sizeof(realw),hipMemcpyHostToDevice);
 }
 
 __global__ void process_smooth(realw_const_p xstore_me,realw_const_p ystore_me,realw_const_p zstore_me,
@@ -176,11 +177,11 @@ void FC_FUNC_(prepare_gpu_smooth,
   sp->nspec_me =  *nspec_me;
   sp->nker = *nker;
 
-  print_CUDA_error_if_any(cudaMalloc((void**)&sp->data_smooth,NGLL3*(*nspec_me)*(*nker)*sizeof(realw)),2000);
-  print_CUDA_error_if_any(cudaMemset(sp->data_smooth,0,NGLL3*(*nspec_me)*(*nker)*sizeof(realw)),2001);
+  print_CUDA_error_if_any(hipMalloc((void**)&sp->data_smooth,NGLL3*(*nspec_me)*(*nker)*sizeof(realw)),2000);
+  print_CUDA_error_if_any(hipMemset(sp->data_smooth,0,NGLL3*(*nspec_me)*(*nker)*sizeof(realw)),2001);
 
-  print_CUDA_error_if_any(cudaMalloc((void**)&sp->normalisation,NGLL3*(*nspec_me)*sizeof(realw)),2002);
-  print_CUDA_error_if_any(cudaMemset(sp->normalisation,0,NGLL3*(*nspec_me)*sizeof(realw)),2003);
+  print_CUDA_error_if_any(hipMalloc((void**)&sp->normalisation,NGLL3*(*nspec_me)*sizeof(realw)),2002);
+  print_CUDA_error_if_any(hipMemset(sp->normalisation,0,NGLL3*(*nspec_me)*sizeof(realw)),2003);
 }
 
 extern "C"
@@ -221,7 +222,7 @@ void FC_FUNC_(compute_smooth,
   for (int i=0;i<sp->nker;i++){
     copy_todevice_realw((void**)&d_data_other,&data_other[NGLL3*(*nspec_other)*i],NGLL3*(*nspec_other));
 
-    process_smooth<<<grid,threads>>>(sp->x_me,
+    hipLaunchKernelGGL(process_smooth, dim3(grid), dim3(threads), 0, 0, sp->x_me,
                                      sp->y_me,
                                      sp->z_me,
                                      x_other,
@@ -241,14 +242,14 @@ void FC_FUNC_(compute_smooth,
                                      sp->data_smooth,
                                      sp->normalisation,
                                      sp->wgll_cube);
-    cudaFree(d_data_other);
+    hipFree(d_data_other);
   }
   synchronize_cuda();
-  cudaFree(x_other);
-  cudaFree(y_other);
-  cudaFree(z_other);
-  cudaFree(d_jacobian);
-  cudaFree(d_irregular_element_number);
+  hipFree(x_other);
+  hipFree(y_other);
+  hipFree(z_other);
+  hipFree(d_jacobian);
+  hipFree(d_irregular_element_number);
 }
 
 extern "C"
@@ -260,17 +261,17 @@ void FC_FUNC_(get_smooth,
   dim3 grid(sp->nspec_me,1);
   dim3 threads(NGLL3,1,1);
 
-  normalize_data<<<grid,threads>>>(sp->data_smooth,sp->normalisation,sp->nker,sp->nspec_me);
+  hipLaunchKernelGGL(normalize_data, dim3(grid), dim3(threads), 0, 0, sp->data_smooth,sp->normalisation,sp->nker,sp->nspec_me);
 
-  print_CUDA_error_if_any(cudaMemcpy(data_smooth, sp->data_smooth,
-                                       NGLL3*sp->nspec_me*sizeof(int)*sp->nker, cudaMemcpyDeviceToHost),98010);
+  print_CUDA_error_if_any(hipMemcpy(data_smooth, sp->data_smooth,
+                                       NGLL3*sp->nspec_me*sizeof(int)*sp->nker, hipMemcpyDeviceToHost),98010);
 
-  cudaFree(sp->x_me);
-  cudaFree(sp->y_me);
-  cudaFree(sp->z_me);
-  cudaFree(sp->data_smooth);
-  cudaFree(sp->wgll_cube);
-  cudaFree(sp->normalisation);
+  hipFree(sp->x_me);
+  hipFree(sp->y_me);
+  hipFree(sp->z_me);
+  hipFree(sp->data_smooth);
+  hipFree(sp->wgll_cube);
+  hipFree(sp->normalisation);
   free(sp);
 }
 

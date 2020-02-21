@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  !=====================================================================
  !
@@ -990,7 +991,7 @@ void Kernel_2_acoustic(int nb_blocks_to_compute, Mesh* mp, int d_iphase,
   //       to combine forward and backward wavefield in the same kernel call
 
   // Cuda timing
-  cudaEvent_t start, stop;
+  hipEvent_t start, stop;
   if (CUDA_TIMING ){
     start_timing_cuda(&start,&stop);
   }
@@ -1013,7 +1014,7 @@ void Kernel_2_acoustic(int nb_blocks_to_compute, Mesh* mp, int d_iphase,
   if (FORWARD_OR_ADJOINT == 0){
     // This kernel treats both forward and adjoint wavefield within the same call, to increase performance
     // ( ~37% faster for pure acoustic simulations )
-    Kernel_2_acoustic_impl<1><<<grid,threads,0,mp->compute_stream>>>(nb_blocks_to_compute,
+    hipLaunchKernelGGL(HIP_KERNEL_NAME(Kernel_2_acoustic_impl<1>), dim3(grid), dim3(threads), 0, mp->compute_stream, nb_blocks_to_compute,
                                                                       d_ibool,
                                                                       mp->d_irregular_element_number,
                                                                       mp->d_phase_ispec_inner_acoustic,
@@ -1037,7 +1038,7 @@ void Kernel_2_acoustic(int nb_blocks_to_compute, Mesh* mp, int d_iphase,
                                                                       mp->d_wgll_cube);
   } else {
     // solving a single wavefield
-    Kernel_2_acoustic_single_impl<<<grid,threads,0,mp->compute_stream>>>(nb_blocks_to_compute,
+    hipLaunchKernelGGL(Kernel_2_acoustic_single_impl, dim3(grid), dim3(threads), 0, mp->compute_stream, nb_blocks_to_compute,
                                                                          d_ibool,
                                                                          mp->d_phase_ispec_inner_acoustic,
                                                                          mp->num_phase_ispec_acoustic,
@@ -1266,7 +1267,7 @@ TRACE("acoustic_enforce_free_surf_cuda");
     }
 
     // sets potentials to zero at free surface
-    enforce_free_surface_cuda_kernel<<<grid,threads,0,mp->compute_stream>>>(potential,
+    hipLaunchKernelGGL(enforce_free_surface_cuda_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, potential,
                                                                             potential_dot,
                                                                             potential_dot_dot,
                                                                             mp->num_free_surface_faces,

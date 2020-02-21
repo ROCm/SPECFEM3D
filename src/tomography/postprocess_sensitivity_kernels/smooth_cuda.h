@@ -38,7 +38,7 @@ typedef const realw* __restrict__ realw_const_p;
 typedef realw* __restrict__ realw_p;
 
 
-void print_CUDA_error_if_any(cudaError_t err, int num);
+void print_CUDA_error_if_any(hipError_t err, int num);
 void synchronize_cuda();
 typedef struct Smooth_data_ {
 realw * x_me;

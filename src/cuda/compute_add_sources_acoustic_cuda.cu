@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  !=====================================================================
  !
@@ -124,8 +125,8 @@ void FC_FUNC_(compute_add_sources_ac_cuda,
   get_stf_for_gpu(stf_pre_compute,h_stf_pre_compute,run_number_of_the_source,NSOURCES);
 
   // copies pre-computed source time factors onto GPU
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_stf_pre_compute,stf_pre_compute,
-                                     NSOURCES*sizeof(field),cudaMemcpyHostToDevice),1877);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_stf_pre_compute,stf_pre_compute,
+                                     NSOURCES*sizeof(field),hipMemcpyHostToDevice),1877);
   free(stf_pre_compute);
 
   int num_blocks_x, num_blocks_y;
@@ -134,7 +135,7 @@ void FC_FUNC_(compute_add_sources_ac_cuda,
   dim3 grid(num_blocks_x,num_blocks_y);
   dim3 threads(NGLLX,NGLLY,NGLLZ);
 
-  compute_add_sources_acoustic_kernel<<<grid,threads,0,mp->compute_stream>>>(mp->d_potential_dot_dot_acoustic,
+  hipLaunchKernelGGL(compute_add_sources_acoustic_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->d_potential_dot_dot_acoustic,
                                                                               mp->d_ibool,
                                                                               mp->d_sourcearrays,
                                                                               mp->d_stf_pre_compute,
@@ -170,8 +171,8 @@ void FC_FUNC_(compute_add_sources_ac_s3_cuda,
   get_stf_for_gpu(stf_pre_compute,h_stf_pre_compute,run_number_of_the_source,NSOURCES);
 
   // copies source time factors onto GPU
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_stf_pre_compute,stf_pre_compute,
-                                     NSOURCES*sizeof(field),cudaMemcpyHostToDevice),55);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_stf_pre_compute,stf_pre_compute,
+                                     NSOURCES*sizeof(field),hipMemcpyHostToDevice),55);
 
   free(stf_pre_compute);
 
@@ -181,7 +182,7 @@ void FC_FUNC_(compute_add_sources_ac_s3_cuda,
   dim3 grid(num_blocks_x,num_blocks_y);
   dim3 threads(NGLLX,NGLLY,NGLLZ);
 
-  compute_add_sources_acoustic_kernel<<<grid,threads,0,mp->compute_stream>>>(mp->d_b_potential_dot_dot_acoustic,
+  hipLaunchKernelGGL(compute_add_sources_acoustic_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->d_b_potential_dot_dot_acoustic,
                                                                               mp->d_ibool,
                                                                               mp->d_sourcearrays,
                                                                               mp->d_stf_pre_compute,
@@ -287,11 +288,11 @@ void FC_FUNC_(add_sources_ac_sim_2_or_3_cuda,
   dim3 threads(NGLLX,NGLLY,NGLLZ);
   int it_index = *NTSTEP_BETWEEN_READ_ADJSRC - (*it-1) % *NTSTEP_BETWEEN_READ_ADJSRC - 1 ;
   // copies extracted array values onto GPU
-  if ( (*it-1) % *NTSTEP_BETWEEN_READ_ADJSRC==0) print_CUDA_error_if_any(cudaMemcpy(mp->d_source_adjoint,h_source_adjoint,
-                                                                mp->nadj_rec_local*3*sizeof(field)*(*NTSTEP_BETWEEN_READ_ADJSRC),cudaMemcpyHostToDevice),99099);
+  if ( (*it-1) % *NTSTEP_BETWEEN_READ_ADJSRC==0) print_CUDA_error_if_any(hipMemcpy(mp->d_source_adjoint,h_source_adjoint,
+                                                                mp->nadj_rec_local*3*sizeof(field)*(*NTSTEP_BETWEEN_READ_ADJSRC),hipMemcpyHostToDevice),99099);
 
   // launches cuda kernel for acoustic adjoint sources
-  add_sources_ac_SIM_TYPE_2_OR_3_kernel<<<grid,threads,0,mp->compute_stream>>>(mp->d_potential_dot_dot_acoustic,
+  hipLaunchKernelGGL(add_sources_ac_SIM_TYPE_2_OR_3_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->d_potential_dot_dot_acoustic,
                                                                                 *nrec,it_index,*NTSTEP_BETWEEN_READ_ADJSRC,
                                                                                 mp->d_source_adjoint,
                                                                                 mp->d_hxir,

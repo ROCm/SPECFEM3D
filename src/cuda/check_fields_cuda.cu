@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  !=====================================================================
  !
@@ -84,9 +85,9 @@ void pause_for_debugger(int pause) {
 void exit_on_cuda_error(const char* kernel_name) {
   // sync and check to catch errors from previous async operations
   synchronize_cuda();
-  cudaError_t err = cudaGetLastError();
-  if (err != cudaSuccess){
-    fprintf(stderr,"Error after %s: %s\n", kernel_name, cudaGetErrorString(err));
+  hipError_t err = hipGetLastError();
+  if (err != hipSuccess){
+    fprintf(stderr,"Error after %s: %s\n", kernel_name, hipGetErrorString(err));
 
     //debugging
     //pause_for_debugger(0);
@@ -103,7 +104,7 @@ void exit_on_cuda_error(const char* kernel_name) {
     sprintf(filename,OUTPUT_FILES"/error_message_%06d.txt",myrank);
     fp = fopen(filename,"a+");
     if (fp != NULL){
-      fprintf(fp,"Error after %s: %s\n", kernel_name, cudaGetErrorString(err));
+      fprintf(fp,"Error after %s: %s\n", kernel_name, hipGetErrorString(err));
       fclose(fp);
     }
 
@@ -149,10 +150,10 @@ void exit_on_error(const char* info) {
 
 /* ----------------------------------------------------------------------------------------------- */
 
-void print_CUDA_error_if_any(cudaError_t err, int num) {
-  if (cudaSuccess != err)
+void print_CUDA_error_if_any(hipError_t err, int num) {
+  if (hipSuccess != err)
   {
-    printf("\nCUDA error !!!!! <%s> !!!!! \nat CUDA call error code: # %d\n",cudaGetErrorString(err),num);
+    printf("\nCUDA error !!!!! <%s> !!!!! \nat CUDA call error code: # %d\n",hipGetErrorString(err),num);
     fflush(stdout);
 
     // outputs error file
@@ -167,7 +168,7 @@ void print_CUDA_error_if_any(cudaError_t err, int num) {
     sprintf(filename,OUTPUT_FILES"/error_message_%06d.txt",myrank);
     fp = fopen(filename,"a+");
     if (fp != NULL){
-      fprintf(fp,"\nCUDA error !!!!! <%s> !!!!! \nat CUDA call error code: # %d\n",cudaGetErrorString(err),num);
+      fprintf(fp,"\nCUDA error !!!!! <%s> !!!!! \nat CUDA call error code: # %d\n",hipGetErrorString(err),num);
       fclose(fp);
     }
 
@@ -188,9 +189,9 @@ void print_CUDA_error_if_any(cudaError_t err, int num) {
 
 void synchronize_cuda(){
 #if CUDA_VERSION >= 4000
-    cudaDeviceSynchronize();
+    hipDeviceSynchronize();
 #else
-    cudaThreadSynchronize();
+    hipDeviceSynchronize();
 #endif
 }
 
@@ -208,37 +209,37 @@ void synchronize_mpi(){
 
 /* ----------------------------------------------------------------------------------------------- */
 
-void start_timing_cuda(cudaEvent_t* start,cudaEvent_t* stop){
+void start_timing_cuda(hipEvent_t* start,hipEvent_t* stop){
   // creates & starts event
-  cudaEventCreate(start);
-  cudaEventCreate(stop);
-  cudaEventRecord( *start, 0);
+  hipEventCreate(start);
+  hipEventCreate(stop);
+  hipEventRecord( *start, 0);
 }
 
 /* ----------------------------------------------------------------------------------------------- */
 
-void stop_timing_cuda(cudaEvent_t* start,cudaEvent_t* stop, const char* info_str){
+void stop_timing_cuda(hipEvent_t* start,hipEvent_t* stop, const char* info_str){
   realw time;
   // stops events
-  cudaEventRecord( *stop, 0);
-  cudaEventSynchronize( *stop );
-  cudaEventElapsedTime( &time, *start, *stop );
-  cudaEventDestroy( *start );
-  cudaEventDestroy( *stop );
+  hipEventRecord( *stop, 0);
+  hipEventSynchronize( *stop );
+  hipEventElapsedTime( &time, *start, *stop );
+  hipEventDestroy( *start );
+  hipEventDestroy( *stop );
   // user output
   printf("%s: Execution Time = %f ms\n",info_str,time);
 }
 
 /* ----------------------------------------------------------------------------------------------- */
 
-void stop_timing_cuda(cudaEvent_t* start,cudaEvent_t* stop, const char* info_str,realw* t){
+void stop_timing_cuda(hipEvent_t* start,hipEvent_t* stop, const char* info_str,realw* t){
   realw time;
   // stops events
-  cudaEventRecord( *stop, 0);
-  cudaEventSynchronize( *stop );
-  cudaEventElapsedTime( &time, *start, *stop );
-  cudaEventDestroy( *start );
-  cudaEventDestroy( *stop );
+  hipEventRecord( *stop, 0);
+  hipEventSynchronize( *stop );
+  hipEventElapsedTime( &time, *start, *stop );
+  hipEventDestroy( *start );
+  hipEventDestroy( *stop );
   // user output
   printf("%s: Execution Time = %f ms\n",info_str,time);
 
@@ -284,9 +285,9 @@ void get_free_memory(double* free_db, double* used_db, double* total_db) {
   // gets memory usage in byte
   size_t free_byte ;
   size_t total_byte ;
-  cudaError_t cuda_status = cudaMemGetInfo( &free_byte, &total_byte ) ;
-  if (cudaSuccess != cuda_status){
-    printf("Error: cudaMemGetInfo fails, %s \n", cudaGetErrorString(cuda_status) );
+  hipError_t cuda_status = hipMemGetInfo( &free_byte, &total_byte ) ;
+  if (hipSuccess != cuda_status){
+    printf("Error: hipMemGetInfo fails, %s \n", hipGetErrorString(cuda_status) );
     exit(EXIT_FAILURE);
   }
 
@@ -405,11 +406,11 @@ realw get_device_array_maximum_value(realw* array, int size){
     realw* h_array;
 
     // explicitly wait for cuda kernels to finish
-    // (cudaMemcpy implicitly synchronizes all other cuda operations)
+    // (hipMemcpy implicitly synchronizes all other cuda operations)
     synchronize_cuda();
 
     h_array = (realw*)calloc(size,sizeof(realw));
-    print_CUDA_error_if_any(cudaMemcpy(h_array,array,sizeof(realw)*size,cudaMemcpyDeviceToHost),33001);
+    print_CUDA_error_if_any(hipMemcpy(h_array,array,sizeof(realw)*size,hipMemcpyDeviceToHost),33001);
 
     // finds maximum value in array
     max = h_array[0];
@@ -495,8 +496,8 @@ void FC_FUNC_(get_norm_acoustic_from_device,
    realw* h_array;
    h_array = (realw*)calloc(mp->NGLOB_AB,sizeof(realw));
 
-   print_CUDA_error_if_any(cudaMemcpy(h_array,mp->d_potential_dot_dot_acoustic,
-   sizeof(realw)*(mp->NGLOB_AB),cudaMemcpyDeviceToHost),131);
+   print_CUDA_error_if_any(hipMemcpy(h_array,mp->d_potential_dot_dot_acoustic,
+   sizeof(realw)*(mp->NGLOB_AB),hipMemcpyDeviceToHost),131);
 
    // finds maximum value in array
    max = h_array[0];
@@ -508,17 +509,17 @@ void FC_FUNC_(get_norm_acoustic_from_device,
 
   /* way 2: timing Elapsed time: 8.818102e-02
    // launch simple kernel
-   cudaMalloc((void**)&d_max,sizeof(realw));
+   hipMalloc((void**)&d_max,sizeof(realw));
 
    dim3 grid(1,1);
    dim3 threads(1,1,1);
 
-   get_maximum_kernel<<<grid,threads>>>(mp->d_potential_dot_dot_acoustic,
+   hipLaunchKernelGGL(get_maximum_kernel, dim3(grid), dim3(threads), 0, 0, mp->d_potential_dot_dot_acoustic,
    mp->NGLOB_AB,
    d_max);
-   print_CUDA_error_if_any(cudaMemcpy(&max,d_max, sizeof(realw), cudaMemcpyDeviceToHost),222);
+   print_CUDA_error_if_any(hipMemcpy(&max,d_max, sizeof(realw), hipMemcpyDeviceToHost),222);
 
-   cudaFree(d_max);
+   hipFree(d_max);
    */
 
   // way 2 b: timing Elapsed time: 1.236916e-03
@@ -541,15 +542,15 @@ void FC_FUNC_(get_norm_acoustic_from_device,
   h_max = (realw*) calloc(num_blocks_x*num_blocks_y,sizeof(realw));
 
   // allocates memory on device
-  print_CUDA_error_if_any(cudaMalloc((void**)&d_max,num_blocks_x*num_blocks_y*sizeof(realw)),78001);
+  print_CUDA_error_if_any(hipMalloc((void**)&d_max,num_blocks_x*num_blocks_y*sizeof(realw)),78001);
   // initializes values to zero
-  print_CUDA_error_if_any(cudaMemset(d_max,0,num_blocks_x*num_blocks_y*sizeof(realw)),77002);
+  print_CUDA_error_if_any(hipMemset(d_max,0,num_blocks_x*num_blocks_y*sizeof(realw)),77002);
 
 
   if (*sim_type == 1){
-    get_maximum_kernel<<<grid,threads,0,mp->compute_stream>>>(mp->d_potential_dot_dot_acoustic,size,d_max);
+    hipLaunchKernelGGL(get_maximum_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->d_potential_dot_dot_acoustic,size,d_max);
   }else if (*sim_type == 3){
-    get_maximum_kernel<<<grid,threads,0,mp->compute_stream>>>(mp->d_b_potential_dot_dot_acoustic,size,d_max);
+    hipLaunchKernelGGL(get_maximum_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->d_b_potential_dot_dot_acoustic,size,d_max);
   }
 
   GPU_ERROR_CHECKING("kernel get_maximum_kernel");
@@ -557,11 +558,11 @@ void FC_FUNC_(get_norm_acoustic_from_device,
   // synchronizes
   //synchronize_cuda();
   // explicitly waits for stream to finish
-  // (cudaMemcpy implicitly synchronizes all other cuda operations)
-  cudaStreamSynchronize(mp->compute_stream);
+  // (hipMemcpy implicitly synchronizes all other cuda operations)
+  hipStreamSynchronize(mp->compute_stream);
 
-  print_CUDA_error_if_any(cudaMemcpy(h_max,d_max,num_blocks_x*num_blocks_y*sizeof(realw),
-                                     cudaMemcpyDeviceToHost),222);
+  print_CUDA_error_if_any(hipMemcpy(h_max,d_max,num_blocks_x*num_blocks_y*sizeof(realw),
+                                     hipMemcpyDeviceToHost),222);
 
   // determines max for all blocks
   max = h_max[0];
@@ -569,39 +570,39 @@ void FC_FUNC_(get_norm_acoustic_from_device,
     if (max < h_max[i]) max = h_max[i];
   }
 
-  cudaFree(d_max);
+  hipFree(d_max);
   free(h_max);
 
   /* way 3: doesn't work properly...
-   cublasStatus status;
+   hipblasStatus_t status;
 
    // Initialize CUBLAS
    status = cublasInit();
-   if (status != CUBLAS_STATUS_SUCCESS) {
+   if (status != HIPBLAS_STATUS_SUCCESS) {
    fprintf (stderr, "!!!! CUBLAS initialization error\n");
    exit(1);
    }
 
-   // cublas function: cublasIsamax
+   // cublas function: hipblasIsamax
    //       finds the smallest index of the maximum magnitude element of single
    //      precision vector x
    int incr = 1;
    int imax = 0;
-   imax = cublasIsamax(mp->NGLOB_AB,(realw*)mp->d_potential_dot_dot_acoustic, incr);
+   imax = hipblasIsamax(mp->NGLOB_AB,(realw*)mp->d_potential_dot_dot_acoustic, incr);
    status= cublasGetError();
-   if (status != CUBLAS_STATUS_SUCCESS) {
-   fprintf (stderr, "!!!! CUBLAS error in cublasIsamax\n");
+   if (status != HIPBLAS_STATUS_SUCCESS) {
+   fprintf (stderr, "!!!! CUBLAS error in hipblasIsamax\n");
    exit(1);
    }
 
-   print_CUDA_error_if_any(cudaMemcpy(&max,&(mp->d_potential_dot_dot_acoustic[imax]),
-                      sizeof(realw), cudaMemcpyDeviceToHost),222);
+   print_CUDA_error_if_any(hipMemcpy(&max,&(mp->d_potential_dot_dot_acoustic[imax]),
+                      sizeof(realw), hipMemcpyDeviceToHost),222);
 
    printf("maximum %i %i %f \n",mp->NGLOB_AB,imax,max);
 
    // Shutdown
    status = cublasShutdown();
-   if (status != CUBLAS_STATUS_SUCCESS) {
+   if (status != HIPBLAS_STATUS_SUCCESS) {
    fprintf (stderr, "!!!! shutdown error (A)\n");
    exit(1);
    }
@@ -691,14 +692,14 @@ void FC_FUNC_(get_norm_elastic_from_device,
   h_max = (realw*) calloc(num_blocks_x*num_blocks_y,sizeof(realw));
 
   // allocates memory on device
-  print_CUDA_error_if_any(cudaMalloc((void**)&d_max,num_blocks_x*num_blocks_y*sizeof(realw)),77001);
+  print_CUDA_error_if_any(hipMalloc((void**)&d_max,num_blocks_x*num_blocks_y*sizeof(realw)),77001);
   // initializes values to zero
-  print_CUDA_error_if_any(cudaMemset(d_max,0,num_blocks_x*num_blocks_y*sizeof(realw)),77002);
+  print_CUDA_error_if_any(hipMemset(d_max,0,num_blocks_x*num_blocks_y*sizeof(realw)),77002);
 
   if (*type == 1){
-    get_maximum_vector_kernel<<<grid,threads,0,mp->compute_stream>>>(mp->d_displ,size,d_max);
+    hipLaunchKernelGGL(get_maximum_vector_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->d_displ,size,d_max);
   }else if (*type == 3){
-    get_maximum_vector_kernel<<<grid,threads,0,mp->compute_stream>>>(mp->d_b_displ,size,d_max);
+    hipLaunchKernelGGL(get_maximum_vector_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->d_b_displ,size,d_max);
   }
 
   //double end_time = get_time();
@@ -709,12 +710,12 @@ void FC_FUNC_(get_norm_elastic_from_device,
   // synchronizes
   //synchronize_cuda();
   // explicitly waits for stream to finish
-  // (cudaMemcpy implicitly synchronizes all other cuda operations)
-  cudaStreamSynchronize(mp->compute_stream);
+  // (hipMemcpy implicitly synchronizes all other cuda operations)
+  hipStreamSynchronize(mp->compute_stream);
 
   // copies reduction array back to CPU
-  print_CUDA_error_if_any(cudaMemcpy(h_max,d_max,num_blocks_x*num_blocks_y*sizeof(realw),
-                                     cudaMemcpyDeviceToHost),222);
+  print_CUDA_error_if_any(hipMemcpy(h_max,d_max,num_blocks_x*num_blocks_y*sizeof(realw),
+                                     hipMemcpyDeviceToHost),222);
 
   // determines max for all blocks
   max = h_max[0];
@@ -733,7 +734,7 @@ void FC_FUNC_(get_norm_elastic_from_device,
   // debug
   //printf("rank % d - type: %d norm: %f \n",mp->myrank,*type,res);
 
-  cudaFree(d_max);
+  hipFree(d_max);
   free(h_max);
 
   //double end_time = get_time();
@@ -765,7 +766,7 @@ TRACE("get_max_accel");
   int size = *sizef;
   int it = *itf;
   realw* accel_cpy = (realw*)malloc(size*sizeof(realw));
-  cudaMemcpy(accel_cpy,mp->d_accel,size*sizeof(realw),cudaMemcpyDeviceToHost);
+  hipMemcpy(accel_cpy,mp->d_accel,size*sizeof(realw),hipMemcpyDeviceToHost);
   realw maxval=0;
   for(int i=0;i<size;++i) {
     maxval = MAX(maxval,accel_cpy[i]);
@@ -818,22 +819,22 @@ TRACE("get_max_accel");
 
  int* h_debug = (int*) calloc(1,sizeof(int));
  int* d_debug;
- cudaMalloc((void**)&d_debug,sizeof(int));
+ hipMalloc((void**)&d_debug,sizeof(int));
 
  if (type == 1){
- check_phase_ispec_kernel<<<grid,threads>>>(mp->num_phase_ispec_elastic,
+ hipLaunchKernelGGL(check_phase_ispec_kernel, dim3(grid), dim3(threads), 0, 0, mp->num_phase_ispec_elastic,
  mp->d_phase_ispec_inner_elastic,
  mp->NSPEC_AB,
  d_debug);
  }else if (type == 2){
- check_phase_ispec_kernel<<<grid,threads>>>(mp->num_phase_ispec_acoustic,
+ hipLaunchKernelGGL(check_phase_ispec_kernel, dim3(grid), dim3(threads), 0, 0, mp->num_phase_ispec_acoustic,
  mp->d_phase_ispec_inner_acoustic,
  mp->NSPEC_AB,
  d_debug);
  }
 
- cudaMemcpy(h_debug,d_debug,1*sizeof(int),cudaMemcpyDeviceToHost);
- cudaFree(d_debug);
+ hipMemcpy(h_debug,d_debug,1*sizeof(int),hipMemcpyDeviceToHost);
+ hipFree(d_debug);
  if (*h_debug != 0){printf("error for type=%d\n",type); exit(1);}
  free(h_debug);
  fflush(stdout);
@@ -878,24 +879,24 @@ TRACE("get_max_accel");
 
  int* h_debug = (int*) calloc(1,sizeof(int));
  int* d_debug;
- cudaMalloc((void**)&d_debug,sizeof(int));
+ hipMalloc((void**)&d_debug,sizeof(int));
 
  if (type == 0){
- check_ispec_is_kernel<<<grid,threads>>>(mp->NSPEC_AB,
+ hipLaunchKernelGGL(check_ispec_is_kernel, dim3(grid), dim3(threads), 0, 0, mp->NSPEC_AB,
  mp->d_ispec_is_inner,
  d_debug);
  }else if (type == 1){
- check_ispec_is_kernel<<<grid,threads>>>(mp->NSPEC_AB,
+ hipLaunchKernelGGL(check_ispec_is_kernel, dim3(grid), dim3(threads), 0, 0, mp->NSPEC_AB,
  mp->d_ispec_is_elastic,
  d_debug);
  }else if (type == 2){
- check_ispec_is_kernel<<<grid,threads>>>(mp->NSPEC_AB,
+ hipLaunchKernelGGL(check_ispec_is_kernel, dim3(grid), dim3(threads), 0, 0, mp->NSPEC_AB,
  mp->d_ispec_is_acoustic,
  d_debug);
  }
 
- cudaMemcpy(h_debug,d_debug,1*sizeof(int),cudaMemcpyDeviceToHost);
- cudaFree(d_debug);
+ hipMemcpy(h_debug,d_debug,1*sizeof(int),hipMemcpyDeviceToHost);
+ hipFree(d_debug);
  if (*h_debug != 0){printf("error for type=%d\n",type); exit(1);}
  free(h_debug);
  fflush(stdout);
@@ -942,17 +943,17 @@ TRACE("get_max_accel");
 
  int* h_debug = (int*) calloc(1,sizeof(int));
  int* d_debug;
- cudaMalloc((void**)&d_debug,sizeof(int));
+ hipMalloc((void**)&d_debug,sizeof(int));
 
  if (type == 1){
- check_array_ispec_kernel<<<grid,threads>>>(mp->d_num_abs_boundary_faces,
+ hipLaunchKernelGGL(check_array_ispec_kernel, dim3(grid), dim3(threads), 0, 0, mp->d_num_abs_boundary_faces,
  mp->d_abs_boundary_ispec,
  mp->NSPEC_AB,
  d_debug);
  }
 
- cudaMemcpy(h_debug,d_debug,1*sizeof(int),cudaMemcpyDeviceToHost);
- cudaFree(d_debug);
+ hipMemcpy(h_debug,d_debug,1*sizeof(int),hipMemcpyDeviceToHost);
+ hipFree(d_debug);
  if (*h_debug != 0){printf("error for type=%d\n",type); exit(1);}
  free(h_debug);
  fflush(stdout);
@@ -978,7 +979,7 @@ void FC_FUNC_(check_max_norm_displ_gpu,
 
   Mesh* mp = (Mesh*)(*Mesh_pointer); //get mesh pointer out of fortran integer container
 
-  cudaMemcpy(displ, mp->d_displ,*size*sizeof(realw),cudaMemcpyDeviceToHost);
+  hipMemcpy(displ, mp->d_displ,*size*sizeof(realw),hipMemcpyDeviceToHost);
   realw maxnorm=0;
 
   for(int i=0;i<*size;i++) {
@@ -1045,8 +1046,8 @@ void FC_FUNC_(check_max_norm_b_displ_gpu,
 
   realw* b_accel = (realw*)malloc(*size*sizeof(realw));
 
-  cudaMemcpy(b_displ, mp->d_b_displ,*size*sizeof(realw),cudaMemcpyDeviceToHost);
-  cudaMemcpy(b_accel, mp->d_b_accel,*size*sizeof(realw),cudaMemcpyDeviceToHost);
+  hipMemcpy(b_displ, mp->d_b_displ,*size*sizeof(realw),hipMemcpyDeviceToHost);
+  hipMemcpy(b_accel, mp->d_b_accel,*size*sizeof(realw),hipMemcpyDeviceToHost);
 
   realw maxnorm=0;
   realw maxnorm_accel=0;
@@ -1072,7 +1073,7 @@ void FC_FUNC_(check_max_norm_b_accel_gpu,
 
   Mesh* mp = (Mesh*)(*Mesh_pointer); //get mesh pointer out of fortran integer container
 
-  cudaMemcpy(b_accel, mp->d_b_accel,*size*sizeof(realw),cudaMemcpyDeviceToHost);
+  hipMemcpy(b_accel, mp->d_b_accel,*size*sizeof(realw),hipMemcpyDeviceToHost);
 
   realw maxnorm=0;
 
@@ -1094,7 +1095,7 @@ void FC_FUNC_(check_max_norm_b_veloc_gpu,
 
   Mesh* mp = (Mesh*)(*Mesh_pointer); //get mesh pointer out of fortran integer container
 
-  cudaMemcpy(b_veloc, mp->d_b_veloc,*size*sizeof(realw),cudaMemcpyDeviceToHost);
+  hipMemcpy(b_veloc, mp->d_b_veloc,*size*sizeof(realw),hipMemcpyDeviceToHost);
 
   realw maxnorm=0;
 

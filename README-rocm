@@ -1,0 +1,31 @@
+##
+##
+## building steps for ROCm platform
+##
+##
+
+## Copy ./utils/cit_hip.m4 file to m4/ folder
+
+cp ./utils/cit_hip.m4 ./m4
+
+aclocal \ 
+autoreconf -i \
+make all
+
+
+## Steps to run the test
+
+make test
+
+## Steps to run the examples
+
+
+cd EXAMPLES/ \
+
+# In each example there is DATA/Par_file
+# Set to true to use GPUs
+
+GPU_MODE                        = .true.
+
+# Most of the examples can be run by running the script
+# for some, we need to follow README.md file in respective example folder.

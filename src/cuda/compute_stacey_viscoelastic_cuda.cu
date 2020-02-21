@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  !=====================================================================
  !
@@ -351,15 +352,15 @@ void FC_FUNC_(compute_stacey_viscoelastic_cuda,
   if (mp->simulation_type == 3 && FORWARD_OR_ADJOINT != 1){
     // copies array to GPU
     // reading is done in fortran routine
-    print_CUDA_error_if_any(cudaMemcpy(mp->d_b_absorb_field,b_absorb_field,
-                                       mp->d_b_reclen_field,cudaMemcpyHostToDevice),7700);
+    print_CUDA_error_if_any(hipMemcpy(mp->d_b_absorb_field,b_absorb_field,
+                                       mp->d_b_reclen_field,hipMemcpyHostToDevice),7700);
   }
 
   GPU_ERROR_CHECKING("between cudamemcpy and compute_stacey_elastic_kernel");
 
   if (FORWARD_OR_ADJOINT == 0){
     // combined forward/backward fields
-    compute_stacey_elastic_kernel<<<grid,threads,0,mp->compute_stream>>>(mp->d_veloc,
+    hipLaunchKernelGGL(compute_stacey_elastic_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->d_veloc,
                                                                          mp->d_accel,
                                                                          mp->d_abs_boundary_ispec,
                                                                          mp->d_abs_boundary_ijk,
@@ -376,7 +377,7 @@ void FC_FUNC_(compute_stacey_viscoelastic_cuda,
 
     // adjoint simulations
     if (mp->simulation_type == 3){
-      compute_stacey_elastic_sim3_kernel<<<grid,threads,0,mp->compute_stream>>>(mp->d_abs_boundary_ispec,
+      hipLaunchKernelGGL(compute_stacey_elastic_sim3_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->d_abs_boundary_ispec,
                                                                                 mp->d_abs_boundary_ijk,
                                                                                 mp->d_ibool,
                                                                                 mp->d_ispec_is_elastic,
@@ -396,7 +397,7 @@ void FC_FUNC_(compute_stacey_viscoelastic_cuda,
       accel = mp->d_b_accel;
     }
     // single forward or backward fields
-    compute_stacey_elastic_single_kernel<<<grid,threads,0,mp->compute_stream>>>(veloc,
+    hipLaunchKernelGGL(compute_stacey_elastic_single_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, veloc,
                                                                                 accel,
                                                                                 mp->d_abs_boundary_ispec,
                                                                                 mp->d_abs_boundary_ijk,
@@ -417,12 +418,12 @@ void FC_FUNC_(compute_stacey_viscoelastic_cuda,
 
   if (mp->simulation_type == 1 && mp->save_forward) {
     // explicitly wait until compute stream is done
-    // (cudaMemcpy implicitly synchronizes all other cuda operations)
-    cudaStreamSynchronize(mp->compute_stream);
+    // (hipMemcpy implicitly synchronizes all other cuda operations)
+    hipStreamSynchronize(mp->compute_stream);
 
     // copies absorb_field values to CPU
-    print_CUDA_error_if_any(cudaMemcpy(b_absorb_field,mp->d_b_absorb_field,
-                                       mp->d_b_reclen_field,cudaMemcpyDeviceToHost),7701);
+    print_CUDA_error_if_any(hipMemcpy(b_absorb_field,mp->d_b_absorb_field,
+                                       mp->d_b_reclen_field,hipMemcpyDeviceToHost),7701);
     // writing is done in fortran routine
   }
 
@@ -479,7 +480,7 @@ void FC_FUNC_(compute_stacey_viscoelastic_undoatt_cuda,
   }
 
   // undoatt: single forward or backward fields
-  compute_stacey_elastic_undoatt_kernel<<<grid,threads,0,mp->compute_stream>>>(veloc,
+  hipLaunchKernelGGL(compute_stacey_elastic_undoatt_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, veloc,
                                                                                accel,
                                                                                mp->d_abs_boundary_ispec,
                                                                                mp->d_abs_boundary_ijk,

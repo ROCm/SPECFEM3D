@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  !=====================================================================
  !
@@ -411,7 +412,7 @@ void FC_FUNC_(compute_seismograms_cuda,
   // acoustic wavefield
   if (*ELASTIC_SIMULATION){
     if (mp->save_seismograms_d)
-        compute_elastic_seismogram_kernel<<<grid,threads,0,mp->compute_stream>>>(mp->nrec_local,
+        hipLaunchKernelGGL(compute_elastic_seismogram_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->nrec_local,
                                                                                  mp->d_displ,
                                                                                  mp->d_ibool,
                                                                                  mp->d_hxir,mp->d_hetar,mp->d_hgammar,
@@ -422,7 +423,7 @@ void FC_FUNC_(compute_seismograms_cuda,
 
 
     if (mp->save_seismograms_v)
-        compute_elastic_seismogram_kernel<<<grid,threads,0,mp->compute_stream>>>(mp->nrec_local,
+        hipLaunchKernelGGL(compute_elastic_seismogram_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->nrec_local,
                                                                                  mp->d_veloc,
                                                                                  mp->d_ibool,
                                                                                  mp->d_hxir,mp->d_hetar,mp->d_hgammar,
@@ -432,7 +433,7 @@ void FC_FUNC_(compute_seismograms_cuda,
                                                                                  seismo_current);
 
     if (mp->save_seismograms_a)
-        compute_elastic_seismogram_kernel<<<grid,threads,0,mp->compute_stream>>>(mp->nrec_local,
+        hipLaunchKernelGGL(compute_elastic_seismogram_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->nrec_local,
                                                                                  mp->d_accel,
                                                                                  mp->d_ibool,
                                                                                  mp->d_hxir,mp->d_hetar,mp->d_hgammar,
@@ -446,7 +447,7 @@ void FC_FUNC_(compute_seismograms_cuda,
   if (*ACOUSTIC_SIMULATION){
     if (mp->save_seismograms_p){
         if (*USE_TRICK_FOR_BETTER_PRESSURE){
-          compute_acoustic_seismogram_kernel<<<grid,threads,0,mp->compute_stream>>>(mp->nrec_local,
+          hipLaunchKernelGGL(compute_acoustic_seismogram_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->nrec_local,
                                                                                     mp->d_potential_acoustic,
                                                                                     mp->d_ibool,
                                                                                     mp->d_hxir,mp->d_hetar,mp->d_hgammar,
@@ -454,7 +455,7 @@ void FC_FUNC_(compute_seismograms_cuda,
                                                                                     mp->d_ispec_selected_rec_loc,
                                                                                     seismo_current);
         }else{
-          compute_acoustic_seismogram_kernel<<<grid,threads,0,mp->compute_stream>>>(mp->nrec_local,
+          hipLaunchKernelGGL(compute_acoustic_seismogram_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->nrec_local,
                                                                                     mp->d_potential_dot_dot_acoustic,
                                                                                     mp->d_ibool,
                                                                                     mp->d_hxir,mp->d_hetar,mp->d_hgammar,
@@ -466,7 +467,7 @@ void FC_FUNC_(compute_seismograms_cuda,
 
 // VM VM add computation of vectorial field in fluids ----------------------------------------------------------------
     if (mp->save_seismograms_d)
-      compute_acoustic_vectorial_seismogram_kernel<<<grid,threads,0,mp->compute_stream>>>(mp->nrec_local,
+      hipLaunchKernelGGL(compute_acoustic_vectorial_seismogram_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->nrec_local,
                                                                                           mp->d_ispec_is_acoustic,
                                                                                           mp->d_potential_acoustic,
                                                                                           mp->d_seismograms_d,
@@ -485,7 +486,7 @@ void FC_FUNC_(compute_seismograms_cuda,
 
 
     if (mp->save_seismograms_v)
-      compute_acoustic_vectorial_seismogram_kernel<<<grid,threads,0,mp->compute_stream>>>(mp->nrec_local,
+      hipLaunchKernelGGL(compute_acoustic_vectorial_seismogram_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->nrec_local,
                                                                                           mp->d_ispec_is_acoustic,
                                                                                           mp->d_potential_dot_acoustic,
                                                                                           mp->d_seismograms_v,
@@ -504,7 +505,7 @@ void FC_FUNC_(compute_seismograms_cuda,
 
 
     if (mp->save_seismograms_a)
-      compute_acoustic_vectorial_seismogram_kernel<<<grid,threads,0,mp->compute_stream>>>(mp->nrec_local,
+      hipLaunchKernelGGL(compute_acoustic_vectorial_seismogram_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->nrec_local,
                                                                                           mp->d_ispec_is_acoustic,
                                                                                           mp->d_potential_dot_dot_acoustic,
                                                                                           mp->d_seismograms_a,
@@ -525,13 +526,13 @@ void FC_FUNC_(compute_seismograms_cuda,
   if (seismo_current == NTSTEP_BETWEEN_OUTPUT_SEISMOS || *it == *it_end ){
     int size = mp->nrec_local * NTSTEP_BETWEEN_OUTPUT_SEISMOS;
 
-    // (cudaMemcpy implicitly synchronizes all other cuda operations)
+    // (hipMemcpy implicitly synchronizes all other cuda operations)
     if (mp->save_seismograms_d)
-      print_CUDA_error_if_any(cudaMemcpy(seismograms_d,mp->d_seismograms_d,NDIM * size * sizeof(realw),cudaMemcpyDeviceToHost),72001);
+      print_CUDA_error_if_any(hipMemcpy(seismograms_d,mp->d_seismograms_d,NDIM * size * sizeof(realw),hipMemcpyDeviceToHost),72001);
     if (mp->save_seismograms_v)
-      print_CUDA_error_if_any(cudaMemcpy(seismograms_v,mp->d_seismograms_v,NDIM * size * sizeof(realw),cudaMemcpyDeviceToHost),72002);
+      print_CUDA_error_if_any(hipMemcpy(seismograms_v,mp->d_seismograms_v,NDIM * size * sizeof(realw),hipMemcpyDeviceToHost),72002);
     if (mp->save_seismograms_a)
-      print_CUDA_error_if_any(cudaMemcpy(seismograms_a,mp->d_seismograms_a,NDIM * size * sizeof(realw),cudaMemcpyDeviceToHost),72003);
+      print_CUDA_error_if_any(hipMemcpy(seismograms_a,mp->d_seismograms_a,NDIM * size * sizeof(realw),hipMemcpyDeviceToHost),72003);
 
     // EB EB Temporary solution : in the future we will also declare host pressure seismograms as (1,nrec_local,NTSTEP_BETWEEN_OUTPUT_SEISMOS)
     realw * seismo_temp;
@@ -540,8 +541,8 @@ void FC_FUNC_(compute_seismograms_cuda,
       // if NB_RUNS_ACOUSTIC_GPU = 1 from fortran shape (1,nrec_local,NTSTEP_BETWEEN_OUTPUT_SEISMOS) to (NDIM,nrec_local,NTSTEP_BETWEEN_OUTPUT_SEISMOS)
       // if NB_RUNS_ACOUSTIC_GPU > 1 from fortran shape (NB_RUNS_ACOUSTIC_GPU,nrec_local,NTSTEP_BETWEEN_OUTPUT_SEISMOS) to (NDIM,nrec_local*NB_RUNS_ACOUSTIC_GPU,NTSTEP_BETWEEN_OUTPUT_SEISMOS)
       seismo_temp = (realw*)malloc(size * NB_RUNS_ACOUSTIC_GPU * sizeof(realw));
-      print_CUDA_error_if_any(cudaMemcpy(seismo_temp,mp->d_seismograms_p,
-                                         size * NB_RUNS_ACOUSTIC_GPU * sizeof(realw),cudaMemcpyDeviceToHost),72004);
+      print_CUDA_error_if_any(hipMemcpy(seismo_temp,mp->d_seismograms_p,
+                                         size * NB_RUNS_ACOUSTIC_GPU * sizeof(realw),hipMemcpyDeviceToHost),72004);
 
       for (int it = 0; it<NTSTEP_BETWEEN_OUTPUT_SEISMOS; it++)
         for (int i_recloc=0; i_recloc<mp->nrec_local; i_recloc++)

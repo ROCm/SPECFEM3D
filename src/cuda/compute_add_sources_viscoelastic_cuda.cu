@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  !=====================================================================
  !
@@ -96,8 +97,8 @@ void FC_FUNC_(compute_add_sources_el_cuda,
   stf_pre_compute = (realw*)malloc(NSOURCES * sizeof(realw));
   for (int i_source=0;i_source < NSOURCES;i_source++) stf_pre_compute[i_source] = (realw)h_stf_pre_compute[i_source];
 
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_stf_pre_compute,stf_pre_compute,
-                                     NSOURCES*sizeof(realw),cudaMemcpyHostToDevice),18);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_stf_pre_compute,stf_pre_compute,
+                                     NSOURCES*sizeof(realw),hipMemcpyHostToDevice),18);
   free(stf_pre_compute);
 
   GPU_ERROR_CHECKING("compute_add_sources_el_cuda copy");
@@ -108,7 +109,7 @@ void FC_FUNC_(compute_add_sources_el_cuda,
   dim3 grid(num_blocks_x,num_blocks_y);
   dim3 threads(NGLLX,NGLLY,NGLLZ);
 
-  compute_add_sources_kernel<<<grid,threads,0,mp->compute_stream>>>(mp->d_accel,mp->d_ibool,
+  hipLaunchKernelGGL(compute_add_sources_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->d_accel,mp->d_ibool,
                                                                     mp->d_sourcearrays,
                                                                     mp->d_stf_pre_compute,
                                                                     mp->myrank,
@@ -139,8 +140,8 @@ void FC_FUNC_(compute_add_sources_el_s3_cuda,
   stf_pre_compute = (realw*)malloc(NSOURCES * sizeof(realw));
   for (int i_source=0;i_source < NSOURCES;i_source++) stf_pre_compute[i_source] = (realw)h_stf_pre_compute[i_source];
 
-  print_CUDA_error_if_any(cudaMemcpy(mp->d_stf_pre_compute,stf_pre_compute,
-                                     NSOURCES*sizeof(realw),cudaMemcpyHostToDevice),18);
+  print_CUDA_error_if_any(hipMemcpy(mp->d_stf_pre_compute,stf_pre_compute,
+                                     NSOURCES*sizeof(realw),hipMemcpyHostToDevice),18);
   free(stf_pre_compute);
 
   GPU_ERROR_CHECKING("compute_add_sources_el_s3_cuda copy");
@@ -151,7 +152,7 @@ void FC_FUNC_(compute_add_sources_el_s3_cuda,
   dim3 grid(num_blocks_x,num_blocks_y);
   dim3 threads(NGLLX,NGLLY,NGLLZ);
 
-  compute_add_sources_kernel<<<grid,threads,0,mp->compute_stream>>>(mp->d_b_accel,mp->d_ibool,
+  hipLaunchKernelGGL(compute_add_sources_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->d_b_accel,mp->d_ibool,
                                                                     mp->d_sourcearrays,
                                                                     mp->d_stf_pre_compute,
                                                                     mp->myrank,
@@ -208,7 +209,7 @@ TRACE("\tadd_source_master_rec_noise_cu");
   dim3 threads(NGLL3,1,1);
 
   if (mp->myrank == islice_selected_rec[irec_master_noise-1]) {
-    add_source_master_rec_noise_cuda_kernel<<<grid,threads,0,mp->compute_stream>>>(mp->d_ibool,
+    hipLaunchKernelGGL(add_source_master_rec_noise_cuda_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->d_ibool,
                                                                                     mp->d_ispec_selected_rec,
                                                                                     irec_master_noise,
                                                                                     mp->d_accel,
@@ -292,11 +293,11 @@ void FC_FUNC_(add_sources_el_sim_type_2_or_3,
   int it_index = *NTSTEP_BETWEEN_READ_ADJSRC - (*it-1) % *NTSTEP_BETWEEN_READ_ADJSRC - 1 ;
   // copies extracted array values onto GPU
   if ( (*it-1) % *NTSTEP_BETWEEN_READ_ADJSRC==0){
-    print_CUDA_error_if_any(cudaMemcpy(mp->d_source_adjoint,h_source_adjoint,
-                                       mp->nadj_rec_local*3*sizeof(realw)*(*NTSTEP_BETWEEN_READ_ADJSRC),cudaMemcpyHostToDevice),99099);
+    print_CUDA_error_if_any(hipMemcpy(mp->d_source_adjoint,h_source_adjoint,
+                                       mp->nadj_rec_local*3*sizeof(realw)*(*NTSTEP_BETWEEN_READ_ADJSRC),hipMemcpyHostToDevice),99099);
   }
 
-  add_sources_el_SIM_TYPE_2_OR_3_kernel<<<grid,threads,0,mp->compute_stream>>>(mp->d_accel,
+  hipLaunchKernelGGL(add_sources_el_SIM_TYPE_2_OR_3_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, mp->d_accel,
                                                                                *nrec,it_index,*NTSTEP_BETWEEN_READ_ADJSRC,
                                                                                mp->d_source_adjoint,
                                                                                mp->d_hxir,

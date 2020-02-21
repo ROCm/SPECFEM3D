@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  !=====================================================================
  !
@@ -298,13 +299,13 @@ TRACE("compute_stacey_acoustic_cuda");
   //  adjoint simulations: reads in absorbing boundary
   if (mp->simulation_type == 3 && FORWARD_OR_ADJOINT != 1){
     // copies array to GPU
-    print_CUDA_error_if_any(cudaMemcpy(mp->d_b_absorb_potential,h_b_absorb_potential,
-                                       mp->d_b_reclen_potential,cudaMemcpyHostToDevice),7700);
+    print_CUDA_error_if_any(hipMemcpy(mp->d_b_absorb_potential,h_b_absorb_potential,
+                                       mp->d_b_reclen_potential,hipMemcpyHostToDevice),7700);
   }
 
   if (FORWARD_OR_ADJOINT == 0){
     // combined forward/backward fields
-    compute_stacey_acoustic_kernel<<<grid,threads>>>(mp->d_potential_dot_acoustic,
+    hipLaunchKernelGGL(compute_stacey_acoustic_kernel, dim3(grid), dim3(threads), 0, 0, mp->d_potential_dot_acoustic,
                                                      mp->d_potential_dot_dot_acoustic,
                                                      mp->d_abs_boundary_ispec,
                                                      mp->d_abs_boundary_ijk,
@@ -332,7 +333,7 @@ TRACE("compute_stacey_acoustic_cuda");
       potential_dot_dot = mp->d_b_potential_dot_dot_acoustic;
     }
     // single forward or backward fields
-    compute_stacey_acoustic_single_kernel<<<grid,threads>>>(potential_dot,
+    hipLaunchKernelGGL(compute_stacey_acoustic_single_kernel, dim3(grid), dim3(threads), 0, 0, potential_dot,
                                                             potential_dot_dot,
                                                             mp->d_abs_boundary_ispec,
                                                             mp->d_abs_boundary_ijk,
@@ -351,10 +352,10 @@ TRACE("compute_stacey_acoustic_cuda");
 
   //  adjoint simulations: stores absorbed wavefield part
   if (mp->simulation_type == 1 && mp->save_forward){
-    // (cudaMemcpy implicitly synchronizes all other cuda operations)
+    // (hipMemcpy implicitly synchronizes all other cuda operations)
     // copies array to CPU
-    print_CUDA_error_if_any(cudaMemcpy(h_b_absorb_potential,mp->d_b_absorb_potential,
-                                       mp->d_b_reclen_potential,cudaMemcpyDeviceToHost),7701);
+    print_CUDA_error_if_any(hipMemcpy(h_b_absorb_potential,mp->d_b_absorb_potential,
+                                       mp->d_b_reclen_potential,hipMemcpyDeviceToHost),7701);
   }
 
   GPU_ERROR_CHECKING("compute_stacey_acoustic_kernel");
@@ -412,7 +413,7 @@ TRACE("compute_stacey_acoustic_undoatt_cuda");
   }
 
   // undoatt: single forward or backward fields
-  compute_stacey_acoustic_undoatt_kernel<<<grid,threads>>>(potential_dot,
+  hipLaunchKernelGGL(compute_stacey_acoustic_undoatt_kernel, dim3(grid), dim3(threads), 0, 0, potential_dot,
                                                            potential_dot_dot,
                                                            mp->d_abs_boundary_ispec,
                                                            mp->d_abs_boundary_ijk,

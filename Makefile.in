@@ -132,10 +132,11 @@ PART_LIBS  += $(PATOH_LIBS)
 
 #######################################
 ####
-#### CUDA
-#### with configure: ./configure --with-cuda=cuda5 CUDA_FLAGS=.. CUDA_LIB=.. CUDA_INC=.. MPI_INC=.. ..
-####
+#### CUDA AND HIP
+#### 
 #######################################
+@COND_HIP_TRUE@HIP = yes
+@COND_HIP_FALSE@HIP = no
 
 @COND_CUDA_TRUE@CUDA = yes
 @COND_CUDA_FALSE@CUDA = no
@@ -159,16 +160,6 @@ PART_LIBS  += $(PATOH_LIBS)
 @COND_CUDA_PLUS_TRUE@CUDA_PLUS = yes
 @COND_CUDA_PLUS_FALSE@CUDA_PLUS = no
 
-# default cuda libraries
-# runtime library -lcudart needed, others are optional -lcuda -lcublas
-
-CUDA_FLAGS = @CUDA_FLAGS@
-CUDA_INC = @CUDA_CPPFLAGS@ -I${SETUP}
-CUDA_LINK = @CUDA_LDFLAGS@ @CUDA_LIBS@ -lstdc++
-
-@COND_CUDA_TRUE@NVCC = nvcc
-@COND_CUDA_FALSE@NVCC = @CC@
-
 ##
 ## GPU architecture
 ##
@@ -188,8 +179,11 @@ GENCODE_37 = -gencode=arch=compute_37,code=\"sm_37\"
 GENCODE_50 = -gencode=arch=compute_50,code=\"sm_50,compute_50\"
 GENCODE_60 = -gencode=arch=compute_60,code=\"sm_60,compute_60\"
 GENCODE_70 = -gencode=arch=compute_70,code=\"sm_70,compute_70\"
+GENCODE_AMD= --amdgpu-target=gfx803 --amdgpu-target=gfx900 --amdgpu-target=gfx906
 
-# cuda preprocessor flag
+# preprocessor flag
+#AMD version
+@COND_HIP_TRUE@GENCODE= $(GENCODE_AMD)
 # CUDA version 9.0
 @COND_CUDA_TRUE@@COND_CUDA9_TRUE@GENCODE = $(GENCODE_70) $(FC_DEFINE)GPU_DEVICE_Volta
 # CUDA version 8.0
@@ -203,18 +197,34 @@ GENCODE_70 = -gencode=arch=compute_70,code=\"sm_70,compute_70\"
 # CUDA version 4.x
 @COND_CUDA_TRUE@@COND_CUDA_PLUS_FALSE@GENCODE = $(GENCODE_20)
 
-# CUDA flags and linking
-@COND_CUDA_TRUE@NVCC_FLAGS_BASE = $(CUDA_FLAGS) $(CUDA_INC) $(MPI_INCLUDES) $(COND_MPI_CPPFLAGS)
-@COND_CUDA_TRUE@@COND_CUDA_PLUS_TRUE@NVCC_FLAGS = $(NVCC_FLAGS_BASE) -dc -DCUDA $(GENCODE)
-@COND_CUDA_TRUE@@COND_CUDA_PLUS_FALSE@NVCC_FLAGS = $(NVCC_FLAGS_BASE) -DCUDA -DUSE_OLDER_CUDA4_GPU $(GENCODE)
 
-@COND_CUDA_TRUE@@COND_CUDA_PLUS_TRUE@NVCCLINK_BASE = $(NVCC) $(CUDA_INC) $(MPI_INCLUDES) $(COND_MPI_CPPFLAGS) -DCUDA
+SET_MPI_LIB=-L/usr/local/lib/ -lmpifort -lmpi #This paths must be set by you according to your MPI lib
+SET_HIP_LIB=-L/opt/rocm/lib/ -lhip_hcc
+HIP_FLAGS = @HIP_FLAGS@
+HIP_INC = @HIP_CPPFLAGS@ -I${SETUP}
+HIP_LINKING=hipcc -lgfortran -g -O2  -std=f2003 -pedantic -pedantic-errors -Waliasing -Wampersand -Wcharacter-truncation -Wline-truncation -Wsurprising -Wno-tabs -Wunderflow -Wunused -Werror -O3 -finline-functions
+
+@COND_HIP_TRUE@NVCC = hipcc
+@COND_CUDA_TRUE@NVCC = hipcc
+@COND_HIP_FALSE@@COND_CUDA_FALSE@NVCC = @CC@
+
+
+# HIP flags and linking
+@COND_HIP_TRUE@HIP_FLAGS += -fPIC -ftemplate-depth-2048
+@COND_HIP_TRUE@HIP_FLAGS += $(HIP_INC) $(MPI_INCLUDES) $(COND_MPI_CPPFLAGS)
+@COND_HIP_TRUE@HIP_LINKING += $(GENCODE)
+
+@COND_CUDA_TRUE@HIP_FLAGS += -fPIC -ftemplate-depth-2048
+@COND_CUDA_TRUE@@COND_CUDA_PLUS_TRUE@HIP_FLAGS += -dc -DCUDA $(GENCODE)
+@COND_CUDA_TRUE@@COND_CUDA_PLUS_FALSE@HIP_FLAGS += -DCUDA -DUSE_OLDER_CUDA4_GPU $(GENCODE)
+
+@COND_HIP_FALSE@@COND_CUDA_FALSE@HIP_FLAGS = $(MPI_INCLUDES) $(COND_MPI_CPPFLAGS)
+@COND_HIP_FALSE@@COND_CUDA_FALSE@HIP_LINK = $(NVCC) $(HIP_FLAGS)
+
+
+@COND_CUDA_TRUE@@COND_CUDA_PLUS_TRUE@NVCCLINK_BASE = $(NVCC) $(HIP_INC) $(MPI_INCLUDES) $(COND_MPI_CPPFLAGS) -DCUDA
 @COND_CUDA_TRUE@@COND_CUDA_PLUS_TRUE@NVCCLINK = $(NVCCLINK_BASE) -dlink $(GENCODE)
 @COND_CUDA_TRUE@@COND_CUDA_PLUS_FALSE@NVCCLINK = $(NVCCLINK_BASE) -DUSE_OLDER_CUDA4_GPU $(GENCODE)
-
-@COND_CUDA_FALSE@NVCC_FLAGS = $(MPI_INCLUDES) $(COND_MPI_CPPFLAGS)
-@COND_CUDA_FALSE@NVCCLINK = $(NVCC) $(NVCC_FLAGS)
-
 
 #######################################
 ####

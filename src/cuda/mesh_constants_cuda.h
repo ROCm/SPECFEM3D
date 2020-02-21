@@ -44,8 +44,8 @@
 #ifndef MESH_CONSTANTS_CUDA_H
 #define MESH_CONSTANTS_CUDA_H
 
-#include <cuda_runtime.h>
-#include <cuda.h>
+#include <hip/hip_runtime.h>
+#include <hip/hip_runtime.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -152,7 +152,7 @@
 // Use textures for hprime_xx
 //#define USE_TEXTURES_CONSTANTS
 
-// CUDA version >= 4.0 needed for cudaTextureType1D and cudaDeviceSynchronize()
+// CUDA version >= 4.0 needed for hipTextureType1D and hipDeviceSynchronize()
 #if CUDA_VERSION < 4000
 #undef USE_TEXTURES_FIELDS
 #undef USE_TEXTURES_CONSTANTS
@@ -262,7 +262,7 @@
 // in Kernel_2_impl (not very much..)
 typedef float realw;
 // textures
-typedef texture<float, cudaTextureType1D, cudaReadModeElementType> realw_texture;
+typedef texture<float, hipTextureType1D, hipReadModeElementType> realw_texture;
 
 // pointer declarations
 // restricted pointers: can improve performance on Kepler ~ 10%
@@ -377,7 +377,7 @@ typedef field* __restrict__ field_p;
 // defined in check_fields_cuda.cu
 double get_time();
 void get_free_memory(double* free_db, double* used_db, double* total_db);
-void print_CUDA_error_if_any(cudaError_t err, int num);
+void print_CUDA_error_if_any(hipError_t err, int num);
 void pause_for_debugger(int pause);
 
 void exit_on_cuda_error(const char* kernel_name);
@@ -386,9 +386,9 @@ void exit_on_error(const char* info);
 void synchronize_cuda();
 void synchronize_mpi();
 
-void start_timing_cuda(cudaEvent_t* start,cudaEvent_t* stop);
-void stop_timing_cuda(cudaEvent_t* start,cudaEvent_t* stop, const char* info_str);
-void stop_timing_cuda(cudaEvent_t* start,cudaEvent_t* stop, const char* info_str,realw* t);
+void start_timing_cuda(hipEvent_t* start,hipEvent_t* stop);
+void stop_timing_cuda(hipEvent_t* start,hipEvent_t* stop, const char* info_str);
+void stop_timing_cuda(hipEvent_t* start,hipEvent_t* stop, const char* info_str,realw* t);
 
 void get_blocks_xy(int num_blocks,int* num_blocks_x,int* num_blocks_y);
 realw get_device_array_maximum_value(realw* array,int size);
@@ -477,9 +477,9 @@ typedef struct mesh_ {
   int* d_ibool_interfaces_ext_mesh;
 
   // overlapped memcpy streams
-  cudaStream_t compute_stream;
-  cudaStream_t copy_stream;
-  //cudaStream_t b_copy_stream;
+  hipStream_t compute_stream;
+  hipStream_t copy_stream;
+  //hipStream_t b_copy_stream;
 
   // sources
   int nsources_local;

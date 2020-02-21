@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  !=====================================================================
  !
@@ -164,7 +165,7 @@ void FC_FUNC_(compute_coupling_ac_el_cuda,
   }
 
   // launches GPU kernel
-  compute_coupling_acoustic_el_kernel<<<grid,threads>>>(displ,
+  hipLaunchKernelGGL(compute_coupling_acoustic_el_kernel, dim3(grid), dim3(threads), 0, 0, displ,
                                                         potential_dot_dot,
                                                         num_coupling_ac_el_faces,
                                                         mp->d_coupling_ac_el_ispec,
@@ -339,7 +340,7 @@ void FC_FUNC_(compute_coupling_el_ac_cuda,
 
 
   // launches GPU kernel
-  compute_coupling_elastic_ac_kernel<<<grid,threads>>>(potential_dot_dot,
+  hipLaunchKernelGGL(compute_coupling_elastic_ac_kernel, dim3(grid), dim3(threads), 0, 0, potential_dot_dot,
                                                        accel,
                                                        num_coupling_ac_el_faces,
                                                        mp->d_coupling_ac_el_ispec,
@@ -462,12 +463,12 @@ void FC_FUNC_(compute_coupling_ocean_cuda,
   }
 
   // initializes temporary array to zero
-  print_CUDA_error_if_any(cudaMemset(mp->d_updated_dof_ocean_load,0,
+  print_CUDA_error_if_any(hipMemset(mp->d_updated_dof_ocean_load,0,
                                      sizeof(int)*mp->NGLOB_AB),88501);
 
   GPU_ERROR_CHECKING("before kernel compute_coupling_ocean_cuda");
 
-  compute_coupling_ocean_cuda_kernel<<<grid,threads,0,mp->compute_stream>>>(accel,
+  hipLaunchKernelGGL(compute_coupling_ocean_cuda_kernel, dim3(grid), dim3(threads), 0, mp->compute_stream, accel,
                                                                             mp->d_rmassx,mp->d_rmassy,mp->d_rmassz,
                                                                             mp->d_rmass_ocean_load,
                                                                             mp->num_free_surface_faces,
