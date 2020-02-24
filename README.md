@@ -12,11 +12,13 @@ ROCm implementation of SPECFEM3D
 aclocal 
 autoreconf -i
 ./configure --with-hip
-make all```
+make all
+```
 
 **TEST**
 ```bash
-make test```
+make test
+```
 
 **TO RUN EXAMPLES**
 ```bash
