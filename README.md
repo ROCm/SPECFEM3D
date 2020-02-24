@@ -16,8 +16,8 @@ make all```
 
 **TEST**
 ```bash
-make test
-```
+make test```
+
 **TO RUN EXAMPLES**
 ```bash
 cd EXAMPLES/ 
