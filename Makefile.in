@@ -202,11 +202,12 @@ SET_MPI_LIB=-L/usr/local/lib/ -lmpifort -lmpi #This paths must be set by you acc
 SET_HIP_LIB=-L/opt/rocm/lib/ -lhip_hcc
 HIP_FLAGS = @HIP_FLAGS@
 HIP_INC = @HIP_CPPFLAGS@ -I${SETUP}
-HIP_LINKING=hipcc -lgfortran -g -O2  -std=f2003 -pedantic -pedantic-errors -Waliasing -Wampersand -Wcharacter-truncation -Wline-truncation -Wsurprising -Wno-tabs -Wunderflow -Wunused -Werror -O3 -finline-functions
 
 @COND_HIP_TRUE@NVCC = hipcc
 @COND_CUDA_TRUE@NVCC = hipcc
 @COND_HIP_FALSE@@COND_CUDA_FALSE@NVCC = @CC@
+
+HIP_LINKING=$(NVCC) -lgfortran -g -O2  -std=f2003 -pedantic -pedantic-errors -Waliasing -Wampersand -Wcharacter-truncation -Wline-truncation -Wsurprising -Wno-tabs -Wunderflow -Wunused -Werror -O3 -finline-functions
 
 
 # HIP flags and linking
