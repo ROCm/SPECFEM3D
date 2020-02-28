@@ -198,7 +198,7 @@ GENCODE_AMD= --amdgpu-target=gfx803 --amdgpu-target=gfx900 --amdgpu-target=gfx90
 @COND_CUDA_TRUE@@COND_CUDA_PLUS_FALSE@GENCODE = $(GENCODE_20)
 
 
-SET_MPI_LIB=-L/usr/local/lib/ -lmpifort -lmpi #This paths must be set by you according to your MPI lib
+SET_MPI_LIB=-L/opt/ompi/lib -lmpi_mpifh -lmpi -lmpi_cxx #This paths must be set by you according to your MPI lib
 SET_HIP_LIB=-L/opt/rocm/lib/ -lhip_hcc
 HIP_FLAGS = @HIP_FLAGS@
 HIP_INC = @HIP_CPPFLAGS@ -I${SETUP}
