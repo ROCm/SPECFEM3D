@@ -33,6 +33,7 @@ aclocal
 autoreconf -i
 ./configure --with-hip
 make all
+make realclean # For cleaning all the object and module files.
 ```
 
 **TEST**
