@@ -7,6 +7,10 @@ ROCm implementation of SPECFEM3D
 sudo apt-get install autotools-dev
 sudo apt-get install autoconf
 ```
+- **UNIX UTILITIES**:
+```bash
+sudo apt-get install flex bison gfortran
+```
 - **MPI **(Open MPI)**:**
 ```bash
 # cloning the ompi from GitHub
@@ -19,9 +23,6 @@ cd ompi/
 make
 make install
 ```
-- **UNIX UTILITIES**:
-	- flex
-	- bison
   
 **CHANGES TO DO**
 - Set the variables `SET_MPI_LIB` and `SET_HIP_LIB` in Makefile.in
