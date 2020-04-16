@@ -207,7 +207,7 @@ HIP_INC = @HIP_CPPFLAGS@ -I${SETUP}
 @COND_CUDA_TRUE@NVCC = hipcc
 @COND_HIP_FALSE@@COND_CUDA_FALSE@NVCC = @CC@
 
-HIP_LINKING=$(NVCC) -lgfortran -g -O2  -std=f2003 -pedantic -pedantic-errors -Waliasing -Wampersand -Wcharacter-truncation -Wline-truncation -Wsurprising -Wno-tabs -Wunderflow -Wunused -Werror -O3 -finline-functions
+HIP_LINKING=$(NVCC) -lgfortran -g -O2  -std=f2003 -pedantic -pedantic-errors -Waliasing -Wampersand -Wcharacter-truncation -Wline-truncation -Wsurprising -Wno-tabs -Wunderflow -O3 -finline-functions
 
 
 # HIP flags and linking
