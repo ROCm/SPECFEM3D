@@ -18,7 +18,7 @@ AC_DEFUN([CIT_HIP_CONFIG], [
   AC_ARG_VAR(HIP_INC, [Location of HIP include files])
   AC_ARG_VAR(HIP_LIB, [Location of HIP library libhip_hcc])
   #********The paths which you want to set*********
- AC_SUBST([HIP_INC],[/opt/rocm/hip/include]) #Please set this path as your requirement#
+ AC_SUBST([HIP_INC],[/opt/rocm/include]) #Please set this path as your requirement#
  AC_SUBST([HIP_LIB],[/opt/rocm/lib/])             #Please set this path as your requirement#
   #******************************
   # tests HIPCC variable
@@ -57,8 +57,7 @@ AC_DEFUN([CIT_HIP_CONFIG], [
   ], [
     AC_MSG_RESULT(yes)
   ], [
-    AC_MSG_RESULT(no)
-    AC_MSG_ERROR([HIP runtime header not found; try setting HIP_INC.])
+    AC_MSG_RESULT([HIP runtime header not found; try setting HIP_INC.])
   ])
 
   # Check fo HIP library
@@ -78,8 +77,7 @@ AC_DEFUN([CIT_HIP_CONFIG], [
   ], [
     AC_MSG_RESULT(yes)
   ], [
-    AC_MSG_RESULT(no)
-    AC_MSG_ERROR([HIP library function with hipcc compilation failed; try setting HIP_INC.])
+    AC_MSG_RESULT([HIP library function with hipcc compilation failed; try setting HIP_INC.])
   ])
 
   # runs linking test with hipcc
@@ -90,8 +88,7 @@ AC_DEFUN([CIT_HIP_CONFIG], [
 #include <stdio.h>
 #include <hip/hip_runtime.h>]],[[void* ptr = 0;hipMalloc(&ptr, 1);]])],
     [AC_MSG_RESULT(yes)],
-    [AC_MSG_RESULT(no)
-     AC_MSG_ERROR([HIP library linking with HIP failed; try setting HIP_LIB.])
+    [AC_MSG_RESULT([HIP library linking with HIP failed; try setting HIP_LIB.])
   ])
 
 ##runs linking test with standard compiler
