@@ -205,7 +205,6 @@ FIND_LIB += $(shell mpicxx --showme:libs)
 SET_MPI_LIB = $(shell echo ${FIND_LIB} | sed -e 's/\b\([a-z]\+\)[ ,\n]\1/\1/g'| sed 's/mpi/-lmpi/2'| sed 's/mpi/-lmpi/4'| sed 's/mpi/-lmpi/6'| sed 's/mpi/-lmpi/8' | sed 's/mpi/-lmpi/9')
 
 SET_HIP_LIB = @HIP_LDFLAGS@ @HIP_LIBS@
-HIP_FLAGS = @HIP_FLAGS@
 HIP_INC = @HIP_CPPFLAGS@ -I${SETUP}
 
 @COND_HIP_TRUE@NVCC = hipcc
@@ -216,11 +215,11 @@ HIP_LINKING=$(NVCC) -lgfortran -g -O2  -std=f2003 -pedantic -pedantic-errors -Wa
 
 
 # HIP flags and linking
-@COND_HIP_TRUE@HIP_FLAGS += -fPIC -ftemplate-depth-2048
+@COND_HIP_TRUE@HIP_FLAGS = -fPIC -ftemplate-depth-2048
 @COND_HIP_TRUE@HIP_FLAGS += $(HIP_INC) $(MPI_INCLUDES) $(COND_MPI_CPPFLAGS)
 @COND_HIP_TRUE@HIP_LINKING += $(GENCODE)
 
-@COND_CUDA_TRUE@HIP_FLAGS += -fPIC -ftemplate-depth-2048
+@COND_CUDA_TRUE@HIP_FLAGS = -fPIC -ftemplate-depth-2048
 @COND_CUDA_TRUE@@COND_CUDA_PLUS_TRUE@HIP_FLAGS += -dc -DCUDA $(GENCODE)
 @COND_CUDA_TRUE@@COND_CUDA_PLUS_FALSE@HIP_FLAGS += -DCUDA -DUSE_OLDER_CUDA4_GPU $(GENCODE)
 
