@@ -25,7 +25,7 @@ make install
 ```
   
 **CHANGES TO DO**
-- Set the variables `SET_MPI_LIB` and `SET_HIP_LIB` in Makefile.in
+- Set the variables `SET_HIP_LIB` in Makefile.in
 - Set the `HIP_INC` and `HIP_LIB` in cit_hip.m4 file in /m4 folder.
 
 **BUILDING STEPS**
