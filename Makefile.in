@@ -199,10 +199,10 @@ GENCODE_AMD= --amdgpu-target=gfx803 --amdgpu-target=gfx900 --amdgpu-target=gfx90
 
 
 #Setting MPI library for linking to HIP compiler.
-FIND_LIB = -L$(shell ${MPIFC} --showme:libdirs)
-FIND_LIB += $(shell ${MPIFC} --showme:libs)
-FIND_LIB += $(shell mpicxx --showme:libs)
-SET_MPI_LIB = $(shell echo ${FIND_LIB} | sed -e 's/\b\([a-z]\+\)[ ,\n]\1/\1/g'| sed 's/mpi/-lmpi/2'| sed 's/mpi/-lmpi/4'| sed 's/mpi/-lmpi/6'| sed 's/mpi/-lmpi/8' | sed 's/mpi/-lmpi/9')
+MPI_LIB_PATH = -L$(shell ${MPIFC} --showme:libdirs)
+MPI_LIBS += $(shell ${MPIFC} --showme:libs)
+MPI_LIBS += $(shell mpicxx --showme:libs)
+SET_MPI_LIB = ${MPI_LIB_PATH} $(shell echo ${MPI_LIBS} | sed -e 's/\b\([a-z]\+\)[ ,\n]\1/\1/g'|sed 's/[^ ]* */-l&/g')
 
 SET_HIP_LIB = @HIP_LDFLAGS@ @HIP_LIBS@
 HIP_INC = @HIP_CPPFLAGS@ -I${SETUP}
