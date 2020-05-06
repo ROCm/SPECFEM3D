@@ -248,7 +248,7 @@ SAVE_ALL_SEISMOS_IN_ONE_FILE    = .false.
 # Newmark time scheme acceleration is accurate at zeroth order while displacement is accurate at second order,
 # thus in fluid elements potential_dot_dot_acoustic() is accurate at zeroth order while potential_acoustic()
 # is accurate at second order and thus contains significantly less numerical noise.
-USE_TRICK_FOR_BETTER_PRESSURE   = .true.
+USE_TRICK_FOR_BETTER_PRESSURE   = .false.
 
 #-----------------------------------------------------------
 #
