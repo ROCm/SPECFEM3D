@@ -19,7 +19,7 @@ AC_DEFUN([CIT_HIP_CONFIG], [
   AC_ARG_VAR(HIP_LIB, [Location of HIP library libhip_hcc])
   #********The paths which you want to set*********
  AC_SUBST([HIP_INC],[/opt/rocm/include]) #Please set this path as your requirement#
- AC_SUBST([HIP_LIB],[/opt/rocm/lib/])             #Please set this path as your requirement#
+ AC_SUBST([HIP_LIB],[/opt/rocm/lib])             #Please set this path as your requirement#
   #******************************
   # tests HIPCC variable
   AS_IF([test x"$HIPCC" = x],[
