@@ -32,8 +32,6 @@
 
 /* ----------------------------------------------------------------------------------------------- */
 
-#ifdef USE_OLDER_CUDA4_GPU
-#else
   #ifdef USE_TEXTURES_FIELDS
     // elastic
     extern realw_texture d_displ_tex;
@@ -53,7 +51,6 @@
   #ifdef USE_TEXTURES_CONSTANTS
     extern realw_texture d_hprime_xx_tex;
   #endif
-#endif
 
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -145,15 +142,8 @@ void FC_FUNC_(prepare_constants_device,
   // in the code with with #USE_TEXTURES_FIELDS not-defined.
   #ifdef USE_TEXTURES_CONSTANTS
   {
-    #ifdef USE_OLDER_CUDA4_GPU
-      hipChannelFormatDesc channelDesc = hipCreateChannelDesc<float>();
-      const textureReference* d_hprime_xx_tex_ptr;
-      print_CUDA_error_if_any(hipGetTextureReference(&d_hprime_xx_tex_ptr, "d_hprime_xx_tex"), 4101);
-      print_CUDA_error_if_any(hipBindTexture(0, d_hprime_xx_tex_ptr, mp->d_hprime_xx, &channelDesc, sizeof(realw)*(NGLL2)), 4001);
-   #else
       hipChannelFormatDesc channelDesc = hipCreateChannelDesc<float>();
       print_CUDA_error_if_any(hipBindTexture(0, &d_hprime_xx_tex, mp->d_hprime_xx, &channelDesc, sizeof(realw)*(NGLL2)), 4001);
-   #endif
   }
   #endif
 
@@ -409,20 +399,9 @@ void FC_FUNC_(prepare_fields_acoustic_device,
 
   #ifdef USE_TEXTURES_FIELDS
   {
-    #ifdef USE_OLDER_CUDA4_GPU
-      hipChannelFormatDesc channelDesc = hipCreateChannelDesc<float>();
-      const textureReference* d_potential_tex_ref_ptr;
-      print_CUDA_error_if_any(hipGetTextureReference(&d_potential_tex_ref_ptr, "d_potential_tex"), 2001);
-      print_CUDA_error_if_any(hipBindTexture(0, d_potential_tex_ref_ptr, mp->d_potential_acoustic, &channelDesc, sizeof(realw)*size), 2001);
-
-      const textureReference* d_potential_dot_dot_tex_ref_ptr;
-      print_CUDA_error_if_any(hipGetTextureReference(&d_potential_dot_dot_tex_ref_ptr, "d_potential_dot_dot_tex"), 2003);
-      print_CUDA_error_if_any(hipBindTexture(0, d_potential_dot_dot_tex_ref_ptr, mp->d_potential_dot_dot_acoustic, &channelDesc, sizeof(realw)*size), 2003);
-    #else
       hipChannelFormatDesc channelDesc = hipCreateChannelDesc<float>();
       print_CUDA_error_if_any(hipBindTexture(0, &d_potential_tex, mp->d_potential_acoustic, &channelDesc, sizeof(realw)*size), 2001);
       print_CUDA_error_if_any(hipBindTexture(0, &d_potential_dot_dot_tex, mp->d_potential_dot_dot_acoustic, &channelDesc, sizeof(realw)*size), 2003);
-    #endif
   }
   #endif
 
@@ -531,20 +510,9 @@ void FC_FUNC_(prepare_fields_acoustic_adj_dev,
 
   #ifdef USE_TEXTURES_FIELDS
   {
-    #ifdef USE_OLDER_CUDA4_GPU
-      hipChannelFormatDesc channelDesc = hipCreateChannelDesc<float>();
-      const textureReference* d_b_potential_tex_ref_ptr;
-      print_CUDA_error_if_any(hipGetTextureReference(&d_b_potential_tex_ref_ptr, "d_b_potential_tex"), 3001);
-      print_CUDA_error_if_any(hipBindTexture(0, d_b_potential_tex_ref_ptr, mp->d_b_potential_acoustic, &channelDesc, sizeof(realw)*size), 3001);
-
-      const textureReference* d_b_potential_dot_dot_tex_ref_ptr;
-      print_CUDA_error_if_any(hipGetTextureReference(&d_b_potential_dot_dot_tex_ref_ptr, "d_b_potential_dot_dot_tex"),3003);
-      print_CUDA_error_if_any(hipBindTexture(0, d_b_potential_dot_dot_tex_ref_ptr, mp->d_b_potential_dot_dot_acoustic, &channelDesc, sizeof(realw)*size), 3003);
-    #else
       hipChannelFormatDesc channelDesc = hipCreateChannelDesc<float>();
       print_CUDA_error_if_any(hipBindTexture(0, &d_b_potential_tex, mp->d_b_potential_acoustic, &channelDesc, sizeof(realw)*size), 3001);
       print_CUDA_error_if_any(hipBindTexture(0, &d_b_potential_dot_dot_tex, mp->d_b_potential_dot_dot_acoustic, &channelDesc, sizeof(realw)*size), 3003);
-    #endif
   }
   #endif
 
@@ -645,25 +613,10 @@ void FC_FUNC_(prepare_fields_elastic_device,
 
   #ifdef USE_TEXTURES_FIELDS
   {
-    #ifdef USE_OLDER_CUDA4_GPU
-      hipChannelFormatDesc channelDesc = hipCreateChannelDesc<float>();
-      const textureReference* d_displ_tex_ref_ptr;
-      print_CUDA_error_if_any(hipGetTextureReference(&d_displ_tex_ref_ptr, "d_displ_tex"), 4001);
-      print_CUDA_error_if_any(hipBindTexture(0, d_displ_tex_ref_ptr, mp->d_displ, &channelDesc, sizeof(realw)*size), 4001);
-
-      const textureReference* d_veloc_tex_ref_ptr;
-      print_CUDA_error_if_any(hipGetTextureReference(&d_veloc_tex_ref_ptr, "d_veloc_tex"), 4002);
-      print_CUDA_error_if_any(hipBindTexture(0, d_veloc_tex_ref_ptr, mp->d_veloc, &channelDesc, sizeof(realw)*size), 4002);
-
-      const textureReference* d_accel_tex_ref_ptr;
-      print_CUDA_error_if_any(hipGetTextureReference(&d_accel_tex_ref_ptr, "d_accel_tex"), 4003);
-      print_CUDA_error_if_any(hipBindTexture(0, d_accel_tex_ref_ptr, mp->d_accel, &channelDesc, sizeof(realw)*size), 4003);
-    #else
       hipChannelFormatDesc channelDesc = hipCreateChannelDesc<float>();
       print_CUDA_error_if_any(hipBindTexture(0, &d_displ_tex, mp->d_displ, &channelDesc, sizeof(realw)*size), 4001);
       print_CUDA_error_if_any(hipBindTexture(0, &d_veloc_tex, mp->d_veloc, &channelDesc, sizeof(realw)*size), 4002);
       print_CUDA_error_if_any(hipBindTexture(0, &d_accel_tex, mp->d_accel, &channelDesc, sizeof(realw)*size), 4003);
-    #endif
   }
   #endif
 
@@ -1025,25 +978,10 @@ void FC_FUNC_(prepare_fields_elastic_adj_dev,
 
   #ifdef USE_TEXTURES_FIELDS
   {
-    #ifdef USE_OLDER_CUDA4_GPU
-      hipChannelFormatDesc channelDesc = hipCreateChannelDesc<float>();
-      const textureReference* d_b_displ_tex_ref_ptr;
-      print_CUDA_error_if_any(hipGetTextureReference(&d_b_displ_tex_ref_ptr, "d_b_displ_tex"), 4001);
-      print_CUDA_error_if_any(hipBindTexture(0, d_b_displ_tex_ref_ptr, mp->d_b_displ, &channelDesc, sizeof(realw)*size), 4001);
-
-      const textureReference* d_b_veloc_tex_ref_ptr;
-      print_CUDA_error_if_any(hipGetTextureReference(&d_b_veloc_tex_ref_ptr, "d_b_veloc_tex"), 4002);
-      print_CUDA_error_if_any(hipBindTexture(0, d_b_veloc_tex_ref_ptr, mp->d_b_veloc, &channelDesc, sizeof(realw)*size), 4002);
-
-      const textureReference* d_b_accel_tex_ref_ptr;
-      print_CUDA_error_if_any(hipGetTextureReference(&d_b_accel_tex_ref_ptr, "d_b_accel_tex"), 4003);
-      print_CUDA_error_if_any(hipBindTexture(0, d_b_accel_tex_ref_ptr, mp->d_b_accel, &channelDesc, sizeof(realw)*size), 4003);
-    #else
       hipChannelFormatDesc channelDesc = hipCreateChannelDesc<float>();
       print_CUDA_error_if_any(hipBindTexture(0, &d_b_displ_tex, mp->d_b_displ, &channelDesc, sizeof(realw)*size), 4001);
       print_CUDA_error_if_any(hipBindTexture(0, &d_b_veloc_tex, mp->d_b_veloc, &channelDesc, sizeof(realw)*size), 4002);
       print_CUDA_error_if_any(hipBindTexture(0, &d_b_accel_tex, mp->d_b_accel, &channelDesc, sizeof(realw)*size), 4003);
-    #endif
   }
   #endif
 
