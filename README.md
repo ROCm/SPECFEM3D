@@ -24,9 +24,9 @@ $make install
 ```
   
 **CHANGES TO DO**
--Set the `HIP_INC` and `HIP_LIB` in cit_hip.m4 file in /m4 folder 
+- Set the `HIP_INC` and `HIP_LIB` in cit_hip.m4 file in /m4 folder 
 (Only if it is other than /opt/rocm/include and /opt/rocm/lib).
--Copy cit_hip.m4 file to m4/ folder.
+- Copy cit_hip.m4 file to m4/ folder.
 
 **BUILDING STEPS**
 ```bash
