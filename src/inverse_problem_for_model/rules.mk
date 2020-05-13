@@ -310,9 +310,7 @@ cuda_inverse_problem_for_model_DEVICE_OBJ = \
 	$O/cuda_device_obj.o \
 	$(EMPTY_MACRO)
 
-ifeq ($(CUDA),yes)
-inverse_problem_for_model_OBJECTS += $(cuda_inverse_problem_for_model_OBJECTS)
-else ifeq ($(HIP),yes)
+ifeq ($(HIP),yes)
 inverse_problem_for_model_OBJECTS += $(cuda_inverse_problem_for_model_OBJECTS)
 else
 inverse_problem_for_model_OBJECTS += $(cuda_inverse_problem_for_model_STUBS)
@@ -374,26 +372,9 @@ endif
 #### rules for executables
 ####
 
-ifeq ($(CUDA),yes)
-## cuda version
-ifeq ($(CUDA_PLUS),yes)
-## cuda 5x & 6x version
-INFO_CUDA_INVERSE_PROBLEM="building xinverse_problem_for_model with CUDA support"
-else
-## cuda 4 version
-INFO_CUDA_INVERSE_PROBLEM="building xinverse_problem_for_model with CUDA 4 support"
-endif
+ifeq ($(HIP),yes)
 
-${E}/xinverse_problem_for_model: $(inverse_problem_for_model_OBJECTS) $(inverse_problem_for_model_SHARED_OBJECTS)
-	@echo ""
-	@echo $(INFO_CUDA_INVERSE_PROBLEM)
-	@echo ""
-	${FCLINK} -o ${E}/xinverse_problem_for_model $(inverse_problem_for_model_OBJECTS) $(inverse_problem_for_model_SHARED_OBJECTS) $(MPILIBS) $(CUDA_LINK)
-	@echo ""
-
-else ifeq ($(HIP),yes)
-
-INFO_HIP_INVERSE_PROBLEM="building xinverse_problem_for_model with HIP support"
+INFO_HIP_INVERSE_PROBLEM="building xinverse_problem_for_model with GPU support"
 ${E}/xinverse_problem_for_model: $(inverse_problem_for_model_OBJECTS) $(inverse_problem_for_model_SHARED_OBJECTS)
 	@echo ""
 	@echo $(INFO_HIP_INVERSE_PROBLEM)
@@ -403,7 +384,7 @@ ${E}/xinverse_problem_for_model: $(inverse_problem_for_model_OBJECTS) $(inverse_
 
 else
 
-## non-cuda version
+## non-gpu version
 ${E}/xinverse_problem_for_model: $(inverse_problem_for_model_OBJECTS) $(inverse_problem_for_model_SHARED_OBJECTS)
 	@echo ""
 	@echo "building xinverse_problem_for_model"

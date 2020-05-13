@@ -37,25 +37,7 @@ typedef float realw;  // type of "working" variables
 #define VALUE(x) VALUE_TO_STRING(x)
 #define VAR_NAME_VALUE(var) #var " = "  VALUE(var)
 
-/*#pragma message ("Compiling with: " VAR_NAME_VALUE(CUDA_VERSION) "\n")
-#if defined(__CUDA_ARCH__)
-#pragma message ("Compiling with: " VAR_NAME_VALUE(__CUDA_ARCH__) "\n")
-#endif
 
-// CUDA version >= 5.0 needed for new symbol addressing and texture binding
-#if CUDA_VERSION < 5000
-  #ifndef USE_OLDER_CUDA4_GPU
-    #define USE_OLDER_CUDA4_GPU
-  #endif
-#else
-  #undef USE_OLDER_CUDA4_GPU
-#endif
-
-#ifdef USE_OLDER_CUDA4_GPU
-#pragma message ("\nCompiling with: USE_OLDER_CUDA4_GPU enabled\n")
-#endif
-*/
-/* ----------------------------------------------------------------------------------------------- */
 
 // CONSTANT arrays setup
 
@@ -122,15 +104,10 @@ void setConst_hprime_xx(realw* array, Mesh* mp){
   if (err != hipSuccess)
   {
     fprintf(stderr, "Error in setConst_hprime_xx: %s\n", hipGetErrorString(err));
-    fprintf(stderr, "The problem is maybe -arch sm_13 instead of -arch sm_11 in the Makefile, please doublecheck\n");
     exit(1);
   }
 
-#ifdef USE_OLDER_CUDA4_GPU
-  err = hipGetSymbolAddress((void**)&(mp->d_hprime_xx), HIP_SYMBOL("d_hprime_xx"));
-#else
   err = hipGetSymbolAddress((void**)&(mp->d_hprime_xx), HIP_SYMBOL(d_hprime_xx));
-#endif
   if (err != hipSuccess) {
     fprintf(stderr, "Error with d_hprime_xx: %s\n", hipGetErrorString(err));
     exit(1);
@@ -144,7 +121,6 @@ void setConst_hprime_xx(realw* array, Mesh* mp){
 //   if (err != hipSuccess)
 //   {
 //     fprintf(stderr, "Error in setConst_hprime_yy: %s\n", hipGetErrorString(err));
-//     fprintf(stderr, "The problem is maybe -arch sm_13 instead of -arch sm_11 in the Makefile, please doublecheck\n");
 //     exit(1);
 //   }
 
@@ -162,7 +138,6 @@ void setConst_hprime_xx(realw* array, Mesh* mp){
 //   if (err != hipSuccess)
 //   {
 //     fprintf(stderr, "Error in setConst_hprime_zz: %s\n", hipGetErrorString(err));
-//     fprintf(stderr, "The problem is maybe -arch sm_13 instead of -arch sm_11 in the Makefile, please doublecheck\n");
 //     exit(1);
 //   }
 
@@ -182,12 +157,7 @@ void setConst_hprimewgll_xx(realw* array,Mesh* mp)
     fprintf(stderr, "Error in setConst_hprimewgll_xx: %s\n", hipGetErrorString(err));
     exit(1);
   }
-
-#ifdef USE_OLDER_CUDA4_GPU
-  err = hipGetSymbolAddress((void**)&(mp->d_hprimewgll_xx), HIP_SYMBOL("d_hprimewgll_xx"));
-#else
   err = hipGetSymbolAddress((void**)&(mp->d_hprimewgll_xx), HIP_SYMBOL(d_hprimewgll_xx));
-#endif
   if (err != hipSuccess) {
     fprintf(stderr, "Error with d_hprimewgll_xx: %s\n", hipGetErrorString(err));
     exit(1);
@@ -241,11 +211,7 @@ void setConst_wgllwgll_xy(realw* array,Mesh* mp)
     exit(1);
   }
   //mp->d_wgllwgll_xy = d_wgllwgll_xy;
-#ifdef USE_OLDER_CUDA4_GPU
-  err = hipGetSymbolAddress((void**)&(mp->d_wgllwgll_xy), HIP_SYMBOL("d_wgllwgll_xy"));
-#else
   err = hipGetSymbolAddress((void**)&(mp->d_wgllwgll_xy), HIP_SYMBOL(d_wgllwgll_xy));
-#endif
   if (err != hipSuccess) {
     fprintf(stderr, "Error with d_wgllwgll_xy: %s\n", hipGetErrorString(err));
     exit(1);
@@ -262,11 +228,7 @@ void setConst_wgllwgll_xz(realw* array,Mesh* mp)
     exit(1);
   }
   //mp->d_wgllwgll_xz = d_wgllwgll_xz;
-#ifdef USE_OLDER_CUDA4_GPU
-  err = hipGetSymbolAddress((void**)&(mp->d_wgllwgll_xz), HIP_SYMBOL("d_wgllwgll_xz"));
-#else
   err = hipGetSymbolAddress((void**)&(mp->d_wgllwgll_xz), HIP_SYMBOL(d_wgllwgll_xz));
-#endif
   if (err != hipSuccess) {
     fprintf(stderr, "Error with d_wgllwgll_xz: %s\n", hipGetErrorString(err));
     exit(1);
@@ -283,11 +245,7 @@ void setConst_wgllwgll_yz(realw* array,Mesh* mp)
     exit(1);
   }
   //mp->d_wgllwgll_yz = d_wgllwgll_yz;
-#ifdef USE_OLDER_CUDA4_GPU
-  err = hipGetSymbolAddress((void**)&(mp->d_wgllwgll_yz), HIP_SYMBOL("d_wgllwgll_yz"));
-#else
-  err = hipGetSymbolAddress((void**)&(mp->d_wgllwgll_yz), HIP_SYMBOL(d_wgllwgll_yz));
-#endif
+ err = hipGetSymbolAddress((void**)&(mp->d_wgllwgll_yz), HIP_SYMBOL(d_wgllwgll_yz));
   if (err != hipSuccess) {
     fprintf(stderr, "Error with d_wgllwgll_yz: %s\n", hipGetErrorString(err));
     exit(1);
@@ -304,11 +262,7 @@ void setConst_wgll_cube(realw* array,Mesh* mp)
     exit(1);
   }
   //mp->d_wgll_cube = d_wgll_cube;
-#ifdef USE_OLDER_CUDA4_GPU
-  err = hipGetSymbolAddress((void**)&(mp->d_wgll_cube), HIP_SYMBOL("d_wgll_cube"));
-#else
   err = hipGetSymbolAddress((void**)&(mp->d_wgll_cube), HIP_SYMBOL(d_wgll_cube));
-#endif
   if (err != hipSuccess) {
     fprintf(stderr, "Error with d_wgll_cube: %s\n", hipGetErrorString(err));
     exit(1);
