@@ -93,40 +93,15 @@ fi
 AM_CONDITIONAL([COND_VECTORIZATION], [test x"$want_vec" != xno])
 
 ###
-### CUDA
-###
-
-AC_ARG_WITH([cuda],
-    [AS_HELP_STRING([--with-cuda],
-        [build CUDA GPU enabled version @<:@default=no@:>@])],
-    [want_cuda="$withval"],
-    [want_cuda=no])
-AM_CONDITIONAL([COND_CUDA], [test x"$want_cuda" != xno])
-AM_CONDITIONAL([COND_CUDA5], [test x"$want_cuda" = xcuda5])
-AM_CONDITIONAL([COND_CUDA6], [test x"$want_cuda" = xcuda6])
-AM_CONDITIONAL([COND_CUDA7], [test x"$want_cuda" = xcuda7])
-AM_CONDITIONAL([COND_CUDA8], [test x"$want_cuda" = xcuda8])
-AM_CONDITIONAL([COND_CUDA9], [test x"$want_cuda" = xcuda9])
-# cuda linking for cuda 5x and 6x and 7x and 8x and ..
-AM_CONDITIONAL([COND_CUDA_PLUS],
-  [test "$want_cuda" = cuda5 \
-     -o "$want_cuda" = cuda6 \
-     -o "$want_cuda" = cuda7 \
-     -o "$want_cuda" = cuda8 \
-     -o "$want_cuda" = cuda9 \]
-)
-
-###
-### HIP
+### GPU / HIP
 ###
 
 AC_ARG_WITH([hip],
     [AS_HELP_STRING([--with-hip],
-        [build AMD GPU enabled version @<:@default=no@:>@])],
+        [build GPU enabled version @<:@default=no@:>@])],
     [want_hip="$withval"],
     [want_hip=no])
 AM_CONDITIONAL([COND_HIP], [test x"$want_hip" != xno])
-
 ###
 ### OPENMP
 ###
@@ -429,20 +404,24 @@ CONFIGURE_FLAGS="FC=$FC FCFLAGS=$FCFLAGS"
 AC_SUBST([CONFIGURE_FLAGS])
 
 ###
-### CUDA
+### GPU
 ###
 
-AS_IF([test x"$want_cuda" != xno], [
-    AS_BOX([CUDA])
-    CIT_CUDA_CONFIG
+HIPCONFIG="/opt/rocm/bin/hipconfig"
+GPU_PLATFORM=`$HIPCONFIG --platform`
+AS_IF([test x"$GPU_PLATFORM" = xnvcc], [
+	AC_MSG_NOTICE([HIP PLATFORM NVCC detected.])
+	AS_BOX([HIP])
+        CIT_HIP_CONFIG
+	AS_BOX([CUDA])
+	CIT_CUDA_CONFIG
 ])
-
-AS_IF([test x"$want_hip" != xno], [
-    AS_BOX([HIP])
-    CIT_HIP_CONFIG
+AS_IF([test x"$GPU_PLATFORM" = xhcc], [
+       AC_MSG_NOTICE([HIP PLATFORM HCC detected.])
+       AS_BOX([HIP])
+       CIT_HIP_CONFIG
 ])
-
-
+AM_CONDITIONAL([COND_CUDA], [test x"$GPU_PLATFORM" = xnvcc])
 ###
 ### OPENMP
 ###

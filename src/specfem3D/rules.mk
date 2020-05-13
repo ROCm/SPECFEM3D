@@ -227,13 +227,11 @@ cuda_specfem3D_DEVICE_OBJ = \
 	$O/cuda_device_obj.o \
 	$(EMPTY_MACRO)
 
-ifeq ($(CUDA),yes)
+ifeq ($(HIP),yes)
 specfem3D_OBJECTS += $(cuda_specfem3D_OBJECTS)
-ifeq ($(CUDA_PLUS),yes)
+ifeq ($(CUDA),yes)
 specfem3D_OBJECTS += $(cuda_specfem3D_DEVICE_OBJ)
 endif
-else ifeq ($(HIP),yes)
-specfem3D_OBJECTS += $(cuda_specfem3D_OBJECTS)
 else
 specfem3D_OBJECTS += $(cuda_specfem3D_STUBS)
 endif
@@ -319,26 +317,9 @@ endif
 #### rules for executables
 ####
 
-ifeq ($(CUDA),yes)
-## cuda version
-ifeq ($(CUDA_PLUS),yes)
-## cuda 5x & 6x version
-INFO_CUDA_SPECFEM="building xspecfem3D with CUDA support"
-else
-## cuda 4 version
-INFO_CUDA_SPECFEM="building xspecfem3D with CUDA 4 support"
-endif
+ifeq ($(HIP),yes)
 
-${E}/xspecfem3D: $(specfem3D_OBJECTS) $(specfem3D_SHARED_OBJECTS)
-	@echo ""
-	@echo $(INFO_CUDA_SPECFEM)
-	@echo ""
-	${FCLINK} -o ${E}/xspecfem3D $(specfem3D_OBJECTS) $(specfem3D_SHARED_OBJECTS) $(MPILIBS) $(CUDA_LINK) $(VTKLIBS) $(SPECFEM_LINK_FLAGS)
-	@echo ""
-
-else ifeq ($(HIP),yes)
-
-INFO_CUDA_SPECFEM="building xspecfem3D with HIP support"
+INFO_CUDA_SPECFEM="building xspecfem3D with GPU support"
 
 ${E}/xspecfem3D: $(specfem3D_OBJECTS) $(specfem3D_SHARED_OBJECTS)
 	@echo ""
@@ -349,7 +330,7 @@ ${E}/xspecfem3D: $(specfem3D_OBJECTS) $(specfem3D_SHARED_OBJECTS)
 
 else
 
-## non-cuda version
+## non-gpu version
 ${E}/xspecfem3D: $(specfem3D_OBJECTS) $(specfem3D_SHARED_OBJECTS)
 	@echo ""
 	@echo "building xspecfem3D"

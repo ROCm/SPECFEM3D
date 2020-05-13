@@ -174,25 +174,19 @@ cuda_smooth_sem_DEVICE_OBJ = \
 	$O/cuda_device_smooth_obj.o \
 	$(EMPTY_MACRO)
 
+ifeq ($(HIP),yes)
+INFO_CUDA_SEM="building xsmooth_sem with GPU support"
 ifeq ($(CUDA),yes)
-## cuda version
-xsmooth_sem_OBJECTS += $(cuda_smooth_sem_OBJECTS)
-ifeq ($(CUDA_PLUS),yes)
 xsmooth_sem_OBJECTS += $(cuda_smooth_sem_DEVICE_OBJ)
 endif
-## libs
-xsmooth_sem_LIBS = $(MPILIBS) $(CUDA_LINK)
-INFO_CUDA_SEM="building xsmooth_sem with CUDA support"
-else ifeq ($(HIP),yes)
-INFO_CUDA_SEM="building xsmooth_sem with HIP support"
 xsmooth_sem_OBJECTS += $(cuda_smooth_sem_OBJECTS)
 xsmooth_sem_LIBS = $(MPILIBS) $(HIP_LINK)
 else
-## non-cuda version
+## non-gpu version
 xsmooth_sem_OBJECTS += $(cuda_smooth_sem_STUBS)
 ## libs
 xsmooth_sem_LIBS = $(MPILIBS)
-INFO_CUDA_SEM="building xsmooth_sem without CUDA/HIP support"
+INFO_CUDA_SEM="building xsmooth_sem without GPU support"
 endif
 
 # extra dependencies
@@ -238,10 +232,10 @@ $O/%.postprocess.o: $S/%.c ${SETUP}/config.h
 	${CC} -c $(CPPFLAGS) $(CFLAGS) $(MPI_INCLUDES) -o $@ $<
 
 ###
-### CUDA
+### GPU
 ###
 $O/%.postprocess.cuda.o: $S/%.cu ${SETUP}/config.h $S/smooth_cuda.h
 	${NVCC} -c $< -o $@ $(HIP_FLAGS)
 
 $(cuda_smooth_sem_DEVICE_OBJ): $(cuda_smooth_sem_OBJECTS)
-	${HIP_LINKING} -o $(cuda_smooth_sem_DEVICE_OBJ) $(cuda_smooth_sem_OBJECTS)
+	${NVCCLINK} -o $(cuda_smooth_sem_DEVICE_OBJ) $(cuda_smooth_sem_OBJECTS)
