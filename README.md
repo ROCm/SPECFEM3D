@@ -25,7 +25,7 @@ make install
 ```
   
 **CHANGES TO DO**
-- Set the `HIP_INC` and `HIP_LIB` in cit_hip.m4 file in /m4 folder.
+- Set the `HIP_INC` and `HIP_LIB` in cit_hip.m4 file in /m4 folder (Only if it is other than /opt/rocm/include and /opt/rocm/lib).
 
 **BUILDING STEPS**
 ```bash
@@ -34,6 +34,13 @@ autoreconf -i
 ./configure --with-hip
 make all
 make realclean # For cleaning all the object and module files.
+```
+
+**FOR NVIDIA MACHINE**
+```bash
+//Before ./configure --with-hip step
+export HIP_PLATFORM=nvcc
+export CUDA_LIB=/usr/local/cuda/lib64 //as per your requirement.
 ```
 
 **TEST**
