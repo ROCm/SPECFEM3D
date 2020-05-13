@@ -1,41 +1,61 @@
-# Specfem3D
+# SPECFEM3D
+ROCm implementation of SPECFEM3D
 
-SPECFEM3D_Cartesian simulates acoustic (fluid), elastic (solid), coupled acoustic/elastic, poroelastic or seismic wave propagation in any type of conforming mesh of hexahedra (structured or not.)
+**PREREQUISITES**
+- **Autotools**:
+```bash
+$sudo apt-get install autotools-dev autoconf
+```
+- **UNIX UTILITIES**:
+```bash
+$sudo apt-get install flex bison gfortran
+```
+- **MPI **(Open MPI)**:**
+```bash
+# cloning the ompi from GitHub
+$git clone https://github.com/open-mpi/ompi.git -b v4.0.x
+# Installation of ompi
+$cd ompi/
+$./autogen.pl
+$./configure --prefix=/opt/ompi --enable-mpi-cxx
+#/opt/ompi will be the installation path
+$make
+$make install
+```
+  
+**CHANGES TO DO**
+-Set the `HIP_INC` and `HIP_LIB` in cit_hip.m4 file in /m4 folder 
+(Only if it is other than /opt/rocm/include and /opt/rocm/lib).
+-Copy cit_hip.m4 file to m4/ folder.
 
-It can, for instance, model seismic waves propagating in sedimentary basins or any other regional geological model following earthquakes. It can also be used for non-destructive testing or for ocean acoustics
+**BUILDING STEPS**
+```bash
+$aclocal 
+$autoreconf -i
+$./configure --with-hip
+$make all
+$make realclean # For cleaning all the object and module files.
+```
 
+**FOR NVIDIA MACHINE**
+```bash
+#Before ./configure --with-hip step
+$export HIP_PLATFORM=nvcc
+$export CUDA_LIB=/usr/local/cuda/lib64 #change as per your requirement.
+```
 
-Main "historical" authors: Dimitri Komatitsch and Jeroen Tromp
-  (there are currently many more!)
+**TEST**
+```bash
+$make test
+```
 
-## Installation
+**TO RUN EXAMPLES**
+```bash
+$cd EXAMPLES/ 
 
-Instructions on how to install and use SPECFEM3D are
-available in the
+# In each example there is DATA/Par_file
+# In that file set  GPU_MODE   = .true.
 
-- PDF manual located in directory: [doc/USER_MANUAL](doc/USER_MANUAL)
-
-- HTML manual (latest version): [specfem3d.readthedocs.io](http://specfem3d.readthedocs.io/)
-
-
-## Development
-
-[![Build Status](https://travis-ci.org/geodynamics/specfem3d.svg?branch=devel)](https://travis-ci.org/geodynamics/specfem3d)
-[![codecov](https://codecov.io/gh/geodynamics/specfem3d/branch/devel/graph/badge.svg)](https://codecov.io/gh/geodynamics/specfem3d)
-[![Documentation Status](https://readthedocs.org/projects/specfem3d/badge/?version=latest)](https://specfem3d.readthedocs.io/en/latest/?badge=latest)
-[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](LICENSE)
-
-* Travis tests: [travis-ci specfem3d](https://travis-ci.org/geodynamics/specfem3d/builds)
-
-
-Development is hosted on GitHub in the
-[geodynamics/specfem3d repository](https://github.com/geodynamics/specfem3d).
-
-To contribute, please follow the guidelines located on specfem3d github wiki:
-[specfem3d wiki](https://github.com/geodynamics/specfem3d/wiki)
-
-
-## Computational Infrastructure for Geodynamics (CIG)
-
-Seismology software repository: [SPECFEM3D](https://geodynamics.org/cig/software/specfem3d/)
-
+# Most of the examples can be run by running the script
+# for some, we need to follow README.md file in respective example folder.
+```
