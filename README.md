@@ -17,8 +17,8 @@ $git clone https://github.com/open-mpi/ompi.git -b v4.0.x
 # Installation of ompi
 $cd ompi/
 $./autogen.pl
-$./configure --prefix=/opt/ompi --enable-mpi-cxx
-#/opt/ompi will be the installation path
+$./configure --prefix=/usr/local/openmpi --enable-mpi-cxx
+#/usr/local/openmpi will be the installation path
 $make
 $make install
 ```
