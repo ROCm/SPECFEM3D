@@ -4,7 +4,7 @@ ROCm implementation of SPECFEM3D
 **PREREQUISITES**
 - **Autotools**:
 ```bash
-$sudo apt-get install autotools-dev autoconf
+$sudo apt-get install autotools-dev autoconf libtool
 ```
 - **UNIX UTILITIES**:
 ```bash
