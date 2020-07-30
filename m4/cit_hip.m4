@@ -65,11 +65,11 @@ AC_DEFUN([CIT_HIP_CONFIG], [
     HIP_LDFLAGS="-L$HIP_LIB"
     LDFLAGS="$HIP_LDFLAGS $LDFLAGS"
   fi
-  HIP_LIBS="-lhip_hcc"
+  HIP_LIBS="-lamdhip64"
   LIBS="$HIP_LIBS $LIBS"
 
   # runs compilation test with hipcc
-  AC_MSG_CHECKING([hipcc compilation with hipMalloc in -lhip_hcc])
+  AC_MSG_CHECKING([hipcc compilation with hipMalloc in -lamdhip64])
   ac_compile='$HIPCC -c $CFLAGS conftest.$ac_ext >&5'
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([[
@@ -81,7 +81,7 @@ AC_DEFUN([CIT_HIP_CONFIG], [
   ])
 
   # runs linking test with hipcc
-  AC_MSG_CHECKING([hipcc linking with hipMalloc in -lhip_hcc])
+  AC_MSG_CHECKING([hipcc linking with hipMalloc in -lamdhip64])
   ac_link='$HIPCC -o conftest$ac_exeext $CFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
   AC_LINK_IFELSE(
     [AC_LANG_PROGRAM([[
@@ -92,7 +92,7 @@ AC_DEFUN([CIT_HIP_CONFIG], [
   ])
 
 ##runs linking test with standard compiler
-#  AC_MSG_CHECKING([linking with hipMalloc in -lhip_hcc])
+#  AC_MSG_CHECKING([linking with hipMalloc in -lamdhip64])
 #
 #C compiler linking
 #ac_link='$HIPCC -c $CFLAGS conftest.$ac_ext >&5; $CC -o conftest$ac_exeext $LDFLAGS conftest.$ac_objext $LIBS >&5'
